@@ -1,0 +1,77 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: sandybrown;
+    overflow: visible;
+}
+
+#core_areas {
+    display: flex;
+    height: 100vh;
+}
+
+#core_areas > div {
+    flex: 3;
+    padding: 2vw;
+}
+
+#leftArea {
+    background-color: darkblue;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+#centerArea {
+    background-color: aqua;
+}
+
+#rightArea {
+    background-color: saddlebrown;
+    overflow: auto;
+}
+
+#buyRows {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 2fr 1fr;
+    background-color: #2196F3;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+#buyRows > * {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+}
+
+#upgradeRows {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    background-color: #2196F3;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.upgradeButton {
+    cursor: pointer;
+}
+
+#clickable-div-bigCookie {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 0px;
+
+    /*border: 3px dotted white;*/
+}
+
+.buyBuilding {
+    cursor: pointer;
+}
+
