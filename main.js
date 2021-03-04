@@ -15,7 +15,6 @@ window.onload = function() {
     let totalCookiesLabel = document.getElementById("totalCookiesLabel");
     let cpsLabel = document.getElementById("cpsLabel");
     let bigCookieClickable = document.getElementById("clickable-div-bigCookie");
-    let bigCookieAnimationTimer = 1000;
 
     // Canvas Setup
     let canvas = document.getElementById("cookieCanvas"),
@@ -66,10 +65,6 @@ window.onload = function() {
         else
             cpsLabel.innerText = "per second: " + parseInt(cps.toFixed()).toLocaleString();
         totalCookies += (cps / 100);
-
-        if (bigCookieAnimationTimer >= 4000)
-            anBigClick = 1;
-        bigCookieAnimationTimer += 100;
 
         // Drawing function
         cookieCanvas();
@@ -167,9 +162,8 @@ window.onload = function() {
         }
     }
     function onDocumentMouseUp(event) {
-        if (event.target === bigCookieClickable && bigCookieAnimationTimer >= 1000) {
+        if (event.target === bigCookieClickable) {
             anBigClick = 1;
-            bigCookieAnimationTimer = 0;
         }
     }
 
