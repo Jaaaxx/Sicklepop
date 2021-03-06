@@ -94,11 +94,11 @@ window.onload = function() {
 
         ctx.font = "40px 'Kavoon'"
         let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
-        ctx.fillText(totalCookiesString, canvas.width / 2, rect.top);
+        ctx.fillText(totalCookiesString, canvas.width / 2, rect.top + canvas.height * 0.01);
 
         ctx.font = "26px 'Kavoon'"
         let cpsString = "per second: " + cps.toFixed(1)
-        ctx.fillText(cpsString, canvas.width / 2, rect.top + textLabelsSize * 1.25);
+        ctx.fillText(cpsString, canvas.width / 2, rect.top + canvas.height * 0.01 + textLabelsSize * 1.25);
 
         // Big Cookie
         let img = images["cookie.png"];
