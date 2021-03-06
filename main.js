@@ -97,7 +97,7 @@ window.onload = function() {
         ctx.fillText(totalCookiesString, canvas.width / 2, rect.top + canvas.height * 0.01);
 
         ctx.font = "26px 'Kavoon'"
-        let cpsString = "per second: " + cps.toFixed(1)
+        let cpsString = (cps < 10 && cps !== 0) ? "per second: " + cps.toFixed(1) : "per second: " + cps.toFixed(0);
         ctx.fillText(cpsString, canvas.width / 2, rect.top + canvas.height * 0.01 + textLabelsSize * 1.25);
 
         // Big Cookie
