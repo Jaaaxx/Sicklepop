@@ -12,13 +12,13 @@ let images = {};
 
 window.onload = function() {
     // Semi-global variables
-    let totalCookiesLabel = document.getElementById("totalCookiesLabel");
-    let cpsLabel = document.getElementById("cpsLabel");
     let bigCookieClickable = document.getElementById("clickable-div-bigCookie");
 
     // Canvas Setup
     let canvas = document.getElementById("cookieCanvas"),
-        ctx  = canvas.getContext("2d");
+        ctx  = canvas.getContext("2d"),
+        rect = canvas.getBoundingClientRect();
+    let textLabelsSize;
     setupCanvas();
     let anSmallCookies = [];
     let anBigClick = 0;
@@ -34,10 +34,25 @@ window.onload = function() {
     }
 
     function setupCanvas() {
-        canvas.style.width='100%';
-        canvas.style.height='60%';
+        // Make it visually fill the positioned parent
+        canvas.style.width ='100%';
+        canvas.style.height='100%';
+        // ...then set the internal size to match
         canvas.width  = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
+
+        // Text Labels Setup
+        ctx.font = "40px 'Kavoon'"
+        let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
+        let thmTCS = ctx.measureText(totalCookiesString);
+
+        ctx.font = "26px 'Kavoon'"
+        let cpsString = "per second: " + cps.toFixed(1)
+        let thmCPS = ctx.measureText(cpsString);
+
+        // Get height of text for spacing
+        textLabelsSize = thmTCS.actualBoundingBoxAscent + thmTCS.actualBoundingBoxDescent +
+            thmCPS.actualBoundingBoxAscent + thmCPS.actualBoundingBoxDescent;
     }
 
 
@@ -59,11 +74,6 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        totalCookiesLabel.innerText = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
-        if (cps > 0 && cps < 1)
-            cpsLabel.innerText = "per second: " + cps.toFixed(1);
-        else
-            cpsLabel.innerText = "per second: " + parseInt(cps.toFixed()).toLocaleString();
         totalCookies += (cps / 100);
 
         // Drawing function
@@ -78,31 +88,53 @@ window.onload = function() {
     function cookieCanvas() {
         // Clear Canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Cookies Text
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+
+        ctx.font = "40px 'Kavoon'"
+        let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
+        ctx.fillText(totalCookiesString, canvas.width / 2, rect.top);
+
+        ctx.font = "26px 'Kavoon'"
+        let cpsString = "per second: " + cps.toFixed(1)
+        ctx.fillText(cpsString, canvas.width / 2, rect.top + textLabelsSize * 1.25);
+
         // Big Cookie
         let img = images["cookie.png"];
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        scale /= 1.5;
+
+        let yOffset = 0;
+
         // Click animation
         if (anBigClick <= -1) {
+            let scaleMinus;
             if (anBigClick >= -1000)
-                scale -= rangeConvert(anBigClick, -1, -1000, 0, scale / 10);
+                scaleMinus = rangeConvert(anBigClick, -1, -1000, 0, scale / 10);
             else
-                scale -= rangeConvert(-1000, -1, -1000, 0, scale / 10);
+                scaleMinus = rangeConvert(-1000, -1, -1000, 0, scale / 10);
             anBigClick -= 100;
+            scale -= scaleMinus;
+            yOffset = scaleMinus * 1000;
         }
         let width = img.width * scale;
         let height = img.height * scale;
+
+        let bcMargin = (canvas.height * 0.08) + yOffset;
+
         let x = (canvas.width / 2) - (width / 2);
-        let y = (canvas.height / 2) - (height / 2);
+        let y = textLabelsSize + rect.top + bcMargin;
         ctx.drawImage(img, x, y, width, height);
 
         let clickableDivBigCookie = document.getElementById("clickable-div-bigCookie");
-        clickableDivBigCookie.style.height = width.toString() + "px";
-        clickableDivBigCookie.style.width = height.toString() + "px";
+        clickableDivBigCookie.style.height = height.toString() + "px";
+        clickableDivBigCookie.style.width = width.toString() + "px";
         // Centering
         clickableDivBigCookie.style.marginLeft = ((canvas.width - (x + width))).toString() + "px";
         clickableDivBigCookie.style.marginRight = ((canvas.width - (x + width))).toString() + "px";
-        clickableDivBigCookie.style.marginTop = ((canvas.height - (y + height))).toString() + "px";
-        clickableDivBigCookie.style.marginBottom = ((canvas.height - (y + height))).toString() + "px";
+        clickableDivBigCookie.style.marginTop = (rect.top + textLabelsSize + bcMargin).toString() + "px";
+        clickableDivBigCookie.style.marginBottom = (canvas.height - (height + rect.top + textLabelsSize + bcMargin)).toString() + "px";
 
         // Small cookies
         anSmallCookies.forEach(function(el, index) {
@@ -133,14 +165,14 @@ window.onload = function() {
 
 
     function drawSmallCookie(x, y) {
-        let smallCookieImage = images["smallcookie.png"];
-        let rect = canvas.getBoundingClientRect();
+        let img = images["smallcookie.png"];
 
-        let scale = Math.min(canvas.width / smallCookieImage.width, canvas.height / smallCookieImage.height);
-        let width = (canvas.width * scale) / 6;
-        let height = (canvas.height * scale) / 6;
+        let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        scale /= 8;
+        let width = img.width * scale;
+        let height = img.height * scale;
 
-        return([(x - rect.left) - (width / 2), (y - rect.top) - (height / 2), width, height]);
+        return([(x - rect.left) + (width * 1.25), (y - rect.top) - (height / 2), width, height]);
     }
 
 
