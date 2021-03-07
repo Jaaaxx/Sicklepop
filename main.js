@@ -21,7 +21,7 @@ window.onload = function() {
     let rect;
     let textLabelsSize;
     setupCanvas();
-    let anSmallCookies = [];
+    let anSmallCookies = [{'timeLeft': 0, 'maxTime': 0, 'image': 'smallcookie.png', 'size': [0, 0, 0, 0]}];
     let anBigClick = 0;
 
     // Global function setup
@@ -80,7 +80,7 @@ window.onload = function() {
     function gameLoop() {setInterval(function() {
         totalCookies += (cps / 100);
         newsTimer += 10;
-        if (newsTimer >= 5000) {
+        if (newsTimer >= 10000) {
             newsTimer = 0;
             generateNews();
         }
@@ -145,23 +145,27 @@ window.onload = function() {
         clickableDivBigCookie.style.marginBottom = (canvas.height - (height + rect.top + textLabelsSize + bcMargin)).toString() + "px";
 
         // Small cookies
-        anSmallCookies.forEach(function(el, index) {
-            let timeLeft = el['timeLeft'];
-            if (timeLeft <= 0) {
-                anSmallCookies.splice(index, 1);
-            } else {
-                el['timeLeft'] = timeLeft - 10;
-                let image = images[el['image']];
-                let x = el['size'][0];
-                let y = el['size'][1];
-                let w = el['size'][2];
-                let h = el['size'][3];
+        let c = anSmallCookies.length - 1;
 
-                ctx.globalAlpha = rangeConvert(timeLeft, el['maxTime'], 0, 1, 0);
-                ctx.drawImage(image, x, y, w, h);
-                ctx.globalAlpha = 1
-            }
-        })
+        while(anSmallCookies[c] && c > 0) {
+            let el = anSmallCookies[Math.abs(c - anSmallCookies.length)];
+            let timeLeft = el['timeLeft'];
+
+            el['timeLeft'] = timeLeft - 10;
+            let image = images[el['image']];
+            let x = el['size'][0];
+            let y = el['size'][1];
+            let w = el['size'][2];
+            let h = el['size'][3];
+
+            ctx.globalAlpha = rangeConvert(timeLeft, el['maxTime'], 0, 1, 0);
+            ctx.drawImage(image, x, y, w, h);
+            ctx.globalAlpha = 1;
+
+            if (timeLeft <= 0)
+                anSmallCookies.splice(Math.abs(c - anSmallCookies.length), 1);
+            c--;
+        }
     }
 
     // Convert between number ranges
@@ -180,7 +184,6 @@ window.onload = function() {
         let width = img.width * scale;
         let height = img.height * scale;
 
-        console.log(rect)
         return([x - width * 1.25, y - rect.top - height / 2, width, height]);
     }
 
