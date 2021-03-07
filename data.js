@@ -29,3 +29,9 @@ const imageData = [
     "cookie.png",
     "smallcookie.png"
 ]
+
+const newsData = [
+    "Your cookies taste pretty good.",
+    "Grandma loves you!",
+    "Your cookies bring all the boys to the yard."
+]

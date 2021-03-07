@@ -5,7 +5,7 @@
     <title>Cookie Clicker 2</title>
     <link rel="stylesheet" href="styles.css">
     <script type="text/javascript" src="main.js"></script>
-    <script type="text/javascript" src="upgrades.json.js"></script>
+    <script type="text/javascript" src="data.js"></script>
 </head>
 <body>
 <div id="core_areas">
@@ -14,6 +14,19 @@
         <canvas id="cookieCanvas"></canvas>
     </div>
     <div id="centerArea">
+        <div id="upperCenter">
+            <div class="upColDiv">
+                <button>Options</button>
+                <button>Stats</button>
+            </div>
+            <div class="upColDiv" id="newsDiv">
+                <p id="newsText"></p>
+            </div>
+            <div class="upColDiv">
+                <button>Info</button>
+                <button>Legacy</button>
+            </div>
+        </div>
     </div>
     <div id="rightArea">
         <div id="upgradeRows"></div>

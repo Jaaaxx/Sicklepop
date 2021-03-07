@@ -13,11 +13,12 @@ let images = {};
 window.onload = function() {
     // Semi-global variables
     let bigCookieClickable = document.getElementById("clickable-div-bigCookie");
+    let newsTimer = 10000;
 
     // Canvas Setup
-    let canvas = document.getElementById("cookieCanvas"),
-        ctx  = canvas.getContext("2d"),
-        rect = canvas.getBoundingClientRect();
+    let canvas;
+    let ctx;
+    let rect;
     let textLabelsSize;
     setupCanvas();
     let anSmallCookies = [];
@@ -34,6 +35,9 @@ window.onload = function() {
     }
 
     function setupCanvas() {
+        canvas = document.getElementById("cookieCanvas");
+        ctx  = canvas.getContext("2d");
+        rect = canvas.getBoundingClientRect();
         // Make it visually fill the positioned parent
         canvas.style.width ='100%';
         canvas.style.height='100%';
@@ -75,7 +79,11 @@ window.onload = function() {
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
         totalCookies += (cps / 100);
-
+        newsTimer += 10;
+        if (newsTimer >= 5000) {
+            newsTimer = 0;
+            generateNews();
+        }
         // Drawing function
         cookieCanvas();
     }, 10)}
@@ -172,7 +180,8 @@ window.onload = function() {
         let width = img.width * scale;
         let height = img.height * scale;
 
-        return([(x - rect.left) + (width * 1.25), (y - rect.top) - (height / 2), width, height]);
+        console.log(rect)
+        return([x - width * 1.25, y - rect.top - height / 2, width, height]);
     }
 
 
@@ -197,6 +206,11 @@ window.onload = function() {
         if (event.target === bigCookieClickable) {
             anBigClick = 1;
         }
+    }
+
+    function generateNews() {
+        const newsLabel = document.getElementById("newsText");
+        newsLabel.innerText = newsData[Math.floor(Math.random() * newsData.length)];
     }
 
     function loadImages(callback) {
@@ -264,11 +278,11 @@ class Building {
     }
 
     determineCost() {
-        this.currentCost = this.baseCost * (growthRate ** this.amount); // Formula for determining cost
+        this.currentCost = parseInt((this.baseCost * (growthRate ** this.amount)).toFixed()); // Formula for determining cost
         if (this.name === "Cursor")
-            this.production = (clickMultiplier + (cps * cpsClicks)) / 10
+            this.production = (clickMultiplier + (cps * cpsClicks)) / 10;
         this.production = (this.baseProduction * this.amount) * this.multiplier; // Formula for determining production
-        this.buyButton.innerText = `Buy ${this.name}: ${parseInt(this.currentCost.toFixed()).toLocaleString()} Cookies`;
+        this.buyButton.innerText = `Buy ${this.name}: ${this.currentCost.toLocaleString()} Cookies`;
         this.ownedButton.innerText = this.amount.toString();
     }
 }

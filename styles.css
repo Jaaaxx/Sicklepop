@@ -1,8 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Kavoon&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,700;1,800&display=swap');
 
 html, body {
     height: 100%;
     margin: 0;
+    padding: 0;
     background-color: sandybrown;
     overflow: visible;
 }
@@ -12,13 +14,16 @@ html, body {
     height: 100vh;
 }
 
-#core_areas > div {
-    flex: 3;
-    padding: 2vw;
+
+#leftArea, #rightArea {
+    flex: 1;
 }
+
+
 
 #leftArea {
     background-color: #00468b;
+    padding: 2vw;
     position: relative;
     overflow: hidden;
     text-align: center;
@@ -26,11 +31,52 @@ html, body {
 
 #centerArea {
     background-color: #00008b;
+    flex: 2;
+}
+
+#upperCenter {
+    height: 10vh;
+    background-color: darkcyan;
+    display: flex;
+    flex-direction: row;
+}
+
+.upColDiv {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+}
+
+.upColDiv > button {
+    font: 20px 'Open Sans', sans-serif;
+    font-weight: 800;
+    font-style: italic;
+    color: gray;
+    background-color: sandybrown;
+}
+
+#newsDiv {
+    flex: 4;
+    display: block;
+    text-align: center;
+}
+
+#newsText {
+    display: inline-block;
+    line-height: normal;
+    font: 20px 'Open Sans', sans-serif;
+    color: white;
+}
+
+.upColDiv > * {
+    flex: 1;
 }
 
 #rightArea {
     background-color: #46008b;
     overflow: auto;
+    padding: 1vw;
 }
 
 #buyRows {
