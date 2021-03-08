@@ -126,6 +126,8 @@ window.onload = function() {
     }
 
     function cookieCanvas() {
+        let fontpx = window.innerWidth / 3750;
+
         // Clear Canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ttctx.clearRect(0, 0, ttcanvas.width, ttcanvas.height);
@@ -133,11 +135,11 @@ window.onload = function() {
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
 
-        ctx.font = "40px 'Kavoon'"
+        ctx.font = fontpx * 80 + "px 'Kavoon'"
         let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
         ctx.fillText(totalCookiesString, canvas.width / 2, rect.top + canvas.height * 0.01);
 
-        ctx.font = "26px 'Kavoon'"
+        ctx.font = fontpx * 50 + "px 'Kavoon'"
         let cpsString = (cps < 10 && cps !== 0) ? "per second: " + cps.toFixed(1) : "per second: " + cps.toFixed(0);
         ctx.fillText(cpsString, canvas.width / 2, rect.top + canvas.height * 0.01 + textLabelsSize * 1.25);
 
@@ -201,7 +203,7 @@ window.onload = function() {
             // Click bonus
             ctx.fillStyle = "white";
 
-            ctx.font = "20px 'Kavoon'"
+            ctx.font = fontpx * 40 + "px 'Kavoon'"
             let numEarned = "+" + cpc.toLocaleString();
             ctx.fillText(numEarned, x + w + window.innerWidth * 0.005, y + h / 2);
 
@@ -238,20 +240,20 @@ window.onload = function() {
 
                 // Name
                 ttctx.fillStyle = 'white';
-                ttctx.font = "20px 'Open Sans'"
+                ttctx.font = fontpx * 40 + "px 'Open Sans'"
                 nameSize += marg;
                 ttctx.fillText(upgrade.name, x + marg, y + nameSize);
 
                 // Owned
                 ttctx.fillStyle = 'lightgray';
-                ttctx.font = "15px 'Open Sans'"
+                ttctx.font = fontpx * 30 + "px 'Open Sans'"
                 nameSize += marg;
 
                 ttctx.fillText(ownedText, x + marg, y + nameSize + ownedSize);
 
                 // Description
                 ttctx.fillStyle = 'gray';
-                ttctx.font = "15px 'Open Sans'"
+                ttctx.font = fontpx * 30 + "px 'Open Sans'"
                 nameSize += marg;
 
                 ttctx.fillText(upgrade.description, x + marg, y + nameSize + ownedSize + descSize);
@@ -278,34 +280,34 @@ window.onload = function() {
 
                 // Name
                 ttctx.fillStyle = 'white';
-                ttctx.font = "20px 'Open Sans'";
+                ttctx.font = fontpx * 40 + "px 'Open Sans'";
                 nameSize += marg;
                 ttctx.fillText(upgrade.name, x + marg, y + nameSize);
 
                 // Cost
                 ttctx.fillStyle = 'gold';
-                ttctx.font = "20px 'Open Sans'"
+                ttctx.font = fontpx * 40 + "px 'Open Sans'"
                 let costSizeMeasure = ttctx.measureText("$" + parseInt(upgrade.cost.toFixed()).toLocaleString());
                 let costSize = costSizeMeasure.actualBoundingBoxRight;
                 ttctx.fillText("$" + parseInt(upgrade.cost.toFixed()).toLocaleString(), x + w - costSize - 10, y + nameSize);
 
                 // Owned
                 ttctx.fillStyle = 'lightgray';
-                ttctx.font = "15px 'Open Sans'"
+                ttctx.font = fontpx * 30 + "px 'Open Sans'"
                 nameSize += marg;
 
                 ttctx.fillText("[Upgrade]", x + marg, y + nameSize + ownedSize);
 
                 // Info
                 ttctx.fillStyle = 'navajowhite';
-                ttctx.font = "15px 'Open Sans'"
+                ttctx.font = fontpx * 30 + "px 'Open Sans'"
                 nameSize += marg;
 
                 ttctx.fillText(upgrade.info, x + marg, y + nameSize + ownedSize + infoSize);
 
                 // Description
                 ttctx.fillStyle = 'gray';
-                ttctx.font = "15px 'Open Sans'"
+                ttctx.font = fontpx * 30 + "px 'Open Sans'"
                 let descWidth = descSizeMeasure.actualBoundingBoxRight;
                 nameSize += marg;
 
@@ -351,7 +353,7 @@ window.onload = function() {
         if (target.className !== "buyBuilding" && target.className !== "upgradeButton") {
             for (let depth = 0; depth < 2; depth++) {
                 target = target.parentElement;
-                if (target.className === "buyBuilding" || target.className === "upgradeButton") {
+                if (target && target.className === "buyBuilding" || target.className === "upgradeButton") {
                     break;
                 }
             }
