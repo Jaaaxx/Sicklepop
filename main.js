@@ -3,6 +3,7 @@ let totalCookies = 0;
 let growthRate = 1.15;
 let clickMultiplier = 1;
 let cpsClicks = 0.00;
+let cpc = 0;
 let buildings = {};
 let totalBuildings = 0;
 let cps = 0;
@@ -13,16 +14,28 @@ let images = {};
 window.onload = function() {
     // Semi-global variables
     let bigCookieClickable = document.getElementById("clickable-div-bigCookie");
+    let newsDiv = document.getElementById("newsDiv");
     let newsTimer = 10000;
+    let currTooltip;
 
     // Canvas Setup
     let canvas;
     let ctx;
     let rect;
     let textLabelsSize;
-    setupCanvas();
     let anSmallCookies = [{'timeLeft': 0, 'maxTime': 0, 'image': 'smallcookie.png', 'size': [0, 0, 0, 0]}];
     let anBigClick = 0;
+    let anBigHover = false;
+
+    // Tooltip canvas setup
+    let ttcanvas;
+    let ttctx;
+    let ttrect;
+
+    // News setup
+    newsDiv.onclick = function() {
+        generateNews();
+    }
 
     // Global function setup
     findCps = function() {
@@ -57,14 +70,26 @@ window.onload = function() {
         // Get height of text for spacing
         textLabelsSize = thmTCS.actualBoundingBoxAscent + thmTCS.actualBoundingBoxDescent +
             thmCPS.actualBoundingBoxAscent + thmCPS.actualBoundingBoxDescent;
+        // Tooltip canvas
+        ttcanvas = document.getElementById("tooltipCanvas");
+        ttctx = ttcanvas.getContext("2d");
+        ttrect = ttcanvas.getBoundingClientRect();
+        ttcanvas.style.width ='100%';
+        ttcanvas.style.height='99%';
+        ttcanvas.width = ttcanvas.offsetWidth;
+        ttcanvas.height = ttcanvas.offsetHeight;
+        let scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
+        ttcanvas.width = Math.floor(ttcanvas.width * scale);
+        ttcanvas.height = Math.floor(ttcanvas.height * scale);
+        ttctx.scale(scale, scale);
     }
 
 
     // Buildings Setup
-    buildings['cursor'] = new Building(10, 0.1, "Cursor");
-    buildings['grandma'] = new Building(100, 1, "Grandma");
-    buildings['farm'] = new Building(1000, 10, "Farm");
-    buildings['mine'] = new Building(10000, 100, "Mine");
+
+    buildingsData.forEach(function(el) {
+        buildings[el['name'].toLowerCase()] = new Building(el['baseCost'], el['baseProduction'], el['name'], el['description']);
+    })
 
     // Upgrades
     upgradeData.forEach(function(value) {
@@ -72,8 +97,15 @@ window.onload = function() {
     })
 
     // Runs when big cookie is clicked
-    function onBigCookieClick() {
-        totalCookies += clickMultiplier + (cps * cpsClicks);
+    function onBigCookieClick(clientX, clientY) {
+        cpc = clickMultiplier + (cps * cpsClicks);
+        totalCookies += cpc;
+        let time = 1000;
+        let x = clientX;
+        let y = clientY;
+        x += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
+        y += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
+        anSmallCookies.push({'timeLeft': time, 'maxTime': time, 'image': 'smallcookie.png', 'size': drawSmallCookie(x, y)})
     }
 
     // Runs once every 10 milliseconds
@@ -96,6 +128,7 @@ window.onload = function() {
     function cookieCanvas() {
         // Clear Canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ttctx.clearRect(0, 0, ttcanvas.width, ttcanvas.height);
         // Cookies Text
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
@@ -111,9 +144,14 @@ window.onload = function() {
         // Big Cookie
         let img = images["cookie.png"];
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-        scale /= 1.5;
+        scale /= 1.45;
 
         let yOffset = 0;
+
+        if(anBigHover) {
+            scale *= 1.04;
+            yOffset -= scale * 30;
+        }
 
         // Click animation
         if (anBigClick <= -1) {
@@ -124,7 +162,7 @@ window.onload = function() {
                 scaleMinus = rangeConvert(-1000, -1, -1000, 0, scale / 10);
             anBigClick -= 100;
             scale -= scaleMinus;
-            yOffset = scaleMinus * 1000;
+            yOffset += scaleMinus * 900;
         }
         let width = img.width * scale;
         let height = img.height * scale;
@@ -160,12 +198,126 @@ window.onload = function() {
 
             ctx.globalAlpha = rangeConvert(timeLeft, el['maxTime'], 0, 1, 0);
             ctx.drawImage(image, x, y, w, h);
+            // Click bonus
+            ctx.fillStyle = "white";
+
+            ctx.font = "20px 'Kavoon'"
+            let numEarned = "+" + cpc.toLocaleString();
+            ctx.fillText(numEarned, x + w + window.innerWidth * 0.005, y + h / 2);
+
+
             ctx.globalAlpha = 1;
 
             if (timeLeft <= 0)
                 anSmallCookies.splice(Math.abs(c - anSmallCookies.length), 1);
             c--;
         }
+        // Tooltip
+        if (currTooltip) {
+            let upgrade = currTooltip['upgrade']
+
+            if (upgrade instanceof Building) {
+                let w = ttcanvas.width * 0.4;
+                let x = ttcanvas.width - w - 1;
+                let y = currTooltip['y'] - ttrect.top - 20;
+                let marg = 15;
+
+                // Measure text size beforehand
+                let nameSizeMeasure = ttctx.measureText(upgrade.name);
+                let nameSize = nameSizeMeasure.actualBoundingBoxAscent;
+                let ownedText = "[Owned: " + upgrade.amount + "]";
+                let ownedSizeMeasure = ttctx.measureText(ownedText);
+                let ownedSize = ownedSizeMeasure.actualBoundingBoxAscent;
+                let descSizeMeasure = ttctx.measureText(upgrade.description);
+                let descSize = descSizeMeasure.actualBoundingBoxAscent;
+
+                // Tooltip box
+                drawBorder(x, y, w, nameSize + ownedSize + descSize + marg * 4, 1)
+                ttctx.fillStyle = 'saddlebrown';
+                ttctx.fillRect(x, y, w, nameSize + ownedSize + descSize + marg * 4)
+
+                // Name
+                ttctx.fillStyle = 'white';
+                ttctx.font = "20px 'Open Sans'"
+                nameSize += marg;
+                ttctx.fillText(upgrade.name, x + marg, y + nameSize);
+
+                // Owned
+                ttctx.fillStyle = 'lightgray';
+                ttctx.font = "15px 'Open Sans'"
+                nameSize += marg;
+
+                ttctx.fillText(ownedText, x + marg, y + nameSize + ownedSize);
+
+                // Description
+                ttctx.fillStyle = 'gray';
+                ttctx.font = "15px 'Open Sans'"
+                nameSize += marg;
+
+                ttctx.fillText(upgrade.description, x + marg, y + nameSize + ownedSize + descSize);
+            } else if (upgrade instanceof Upgrade) {
+                let w = ttcanvas.width * 0.4;
+                let x = ttcanvas.width - w - 1;
+                let y = 1;
+                let marg = 15;
+
+                // Measure text size beforehand
+                let nameSizeMeasure = ttctx.measureText(upgrade.name);
+                let nameSize = nameSizeMeasure.actualBoundingBoxAscent;
+                let ownedSizeMeasure = ttctx.measureText("[Upgrade]");
+                let ownedSize = ownedSizeMeasure.actualBoundingBoxAscent;
+                let infoSizeMeasure = ttctx.measureText(upgrade.info);
+                let infoSize = infoSizeMeasure.actualBoundingBoxAscent
+                let descSizeMeasure = ttctx.measureText('“' + upgrade.description + '”');
+                let descSize = descSizeMeasure.actualBoundingBoxAscent
+
+                // Draw box/border
+                drawBorder(x, y, w, nameSize + ownedSize + infoSize + descSize + marg * 5, 1)
+                ttctx.fillStyle = 'saddlebrown';
+                ttctx.fillRect(x, y, w, nameSize + ownedSize + infoSize + descSize + marg * 5)
+
+                // Name
+                ttctx.fillStyle = 'white';
+                ttctx.font = "20px 'Open Sans'";
+                nameSize += marg;
+                ttctx.fillText(upgrade.name, x + marg, y + nameSize);
+
+                // Cost
+                ttctx.fillStyle = 'gold';
+                ttctx.font = "20px 'Open Sans'"
+                let costSizeMeasure = ttctx.measureText("$" + parseInt(upgrade.cost.toFixed()).toLocaleString());
+                let costSize = costSizeMeasure.actualBoundingBoxRight;
+                ttctx.fillText("$" + parseInt(upgrade.cost.toFixed()).toLocaleString(), x + w - costSize - 10, y + nameSize);
+
+                // Owned
+                ttctx.fillStyle = 'lightgray';
+                ttctx.font = "15px 'Open Sans'"
+                nameSize += marg;
+
+                ttctx.fillText("[Upgrade]", x + marg, y + nameSize + ownedSize);
+
+                // Info
+                ttctx.fillStyle = 'navajowhite';
+                ttctx.font = "15px 'Open Sans'"
+                nameSize += marg;
+
+                ttctx.fillText(upgrade.info, x + marg, y + nameSize + ownedSize + infoSize);
+
+                // Description
+                ttctx.fillStyle = 'gray';
+                ttctx.font = "15px 'Open Sans'"
+                let descWidth = descSizeMeasure.actualBoundingBoxRight;
+                nameSize += marg;
+
+                ttctx.fillText('“' + upgrade.description + '”', x + w - descWidth - 10, y + nameSize + ownedSize + infoSize + descSize);
+            }
+        }
+    }
+
+    // Draw border around tooltips
+    function drawBorder(xPos, yPos, width, height, thickness = 1) {
+        ttctx.fillStyle = 'white';
+        ttctx.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
     }
 
     // Convert between number ranges
@@ -175,28 +327,52 @@ window.onload = function() {
         return ((((oldValue - oldMin) * newRange) / oldRange) + newMin)
     }
 
-
     function drawSmallCookie(x, y) {
         let img = images["smallcookie.png"];
 
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-        scale /= 8;
+        scale /= 15;
         let width = img.width * scale;
         let height = img.height * scale;
 
-        return([x - width * 1.25, y - rect.top - height / 2, width, height]);
+        return([x - rect.left - (width / 2), y - rect.top - (height / 2), width, height]);
     }
 
 
     function onDocumentClick(event) {
         if (event.target === bigCookieClickable) {
-            onBigCookieClick();
-            let time = 1000;
-            let x = event.clientX;
-            let y = event.clientY;
-            x += Math.floor((Math.random() * 20)) + 1;
-            y += Math.floor((Math.random() * 20)) + 1;
-            anSmallCookies.push({'timeLeft': time, 'maxTime': time, 'image': 'smallcookie.png', 'size': drawSmallCookie(x, y)});
+            onBigCookieClick(event.clientX, event.clientY);
+        }
+    }
+
+    function onDocumentHover(event) {
+        let target = event.target;
+        anBigHover = target === bigCookieClickable;
+        if (target.className !== "buyBuilding" && target.className !== "upgradeButton") {
+            for (let depth = 0; depth < 2; depth++) {
+                target = target.parentElement;
+                if (target.className === "buyBuilding" || target.className === "upgradeButton") {
+                    break;
+                }
+            }
+        }
+        if (target.className === "buyBuilding") {
+            let b = buildings[target.id.substr(3).toLowerCase()];
+            if (b === currTooltip)
+                return;
+            currTooltip = {"x": event.clientX, "y": event.clientY, "upgrade": b};
+        } else if (target.className === "upgradeButton") {
+            let b = upgrades[parseInt(target.id.substr(7))];
+            if (b === currTooltip)
+                return;
+            currTooltip = {"x": event.clientX, "upgrade": b};
+        }
+    }
+
+    function onDocumentMouseLeave(event) {
+        let target = event.target;
+        if (target.className === "buyBuilding" || target.className === "upgradeButton") {
+            currTooltip = null;
         }
     }
 
@@ -210,10 +386,18 @@ window.onload = function() {
             anBigClick = 1;
         }
     }
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
     function generateNews() {
         const newsLabel = document.getElementById("newsText");
-        newsLabel.innerText = newsData[Math.floor(Math.random() * newsData.length)];
+        let news = newsData[Math.floor(Math.random() * newsData.length)];
+        while (news === newsLabel.innerText)
+            news = newsData[Math.floor(Math.random() * newsData.length)];
+        newsLabel.innerText = news;
     }
 
     function loadImages(callback) {
@@ -239,26 +423,36 @@ window.onload = function() {
     document.addEventListener('click', onDocumentClick);
     document.addEventListener('mousedown', onDocumentMouseDown);
     document.addEventListener('mouseup', onDocumentMouseUp);
+    document.addEventListener('mouseover', onDocumentHover);
+    document.addEventListener('mouseout', onDocumentMouseLeave);
+    document.addEventListener('mousemove', onDocumentHover);
     loadImages(gameLoop);
+    setupCanvas();
+    cookieCanvas();
+    setupCanvas();
 }
 
 class Building {
     name;
+    description;
     baseCost;
     baseProduction;
     currentCost;
     buyButton;
+    priceButton;
     ownedButton;
     amount;
     production;
     multiplier = 1;
 
-    constructor(baseCost, baseProduction, name) {
+    constructor(baseCost, baseProduction, name, description) {
         this.baseCost = baseCost;
         this.currentCost = baseCost;
         this.buyButton = document.getElementById("buy" + name);
+        this.priceButton = document.getElementById("price" + name);
         this.ownedButton = document.getElementById("owned" + name);
         this.name = name;
+        this.description = description;
         this.amount = 0;
         this.baseProduction = baseProduction;
 
@@ -285,8 +479,8 @@ class Building {
         if (this.name === "Cursor")
             this.production = (clickMultiplier + (cps * cpsClicks)) / 10;
         this.production = (this.baseProduction * this.amount) * this.multiplier; // Formula for determining production
-        this.buyButton.innerText = `Buy ${this.name}: ${this.currentCost.toLocaleString()} Cookies`;
-        this.ownedButton.innerText = this.amount.toString();
+        this.priceButton.innerText = "$ " + this.currentCost.toLocaleString();
+        this.ownedButton.innerText = this.amount.toLocaleString();
     }
 }
 
@@ -297,6 +491,8 @@ class Upgrade {
     tier;
     htmlTag;
     description;
+    uid;
+    info;
     bought = false;
 
     constructor(name, type, tier, description) {
@@ -304,26 +500,28 @@ class Upgrade {
         this.type = type;
         this.tier = tier;
         this.description = description;
+        this.uid = upgrades.length;
 
         switch (this.type){
             case 'cursor': {
                 this.cost = (buildings['cursor'].baseCost * 10) * (growthRate ** tier);
+                this.info = "The mouse and cursors are twice as efficient."
                 break;
             }
             case 'mouse': {
                 this.cost = 50000 * (growthRate ** (tier * 100));
+                this.info = "Clicking gains 1% of your cps."
                 break;
             }
             case 'fingers': {
-                // The mouse and cursors gain +0.1 cookies for every non-cursor object owned
                 break;
             }
             case 'specialGrandmas': {
-                // The mouse and cursors gain +0.1 cookies for every non-cursor object owned
                 break;
             }
             default: {
                 this.cost = (buildings[type].baseCost * 10) * (growthRate ** tier);
+                this.info = this.type.charAt(0).toUpperCase() + this.type.slice(1) + "s are twice as efficient."
             }
         }
         this.makeHtml();
@@ -333,6 +531,7 @@ class Upgrade {
         let upgrade = document.createElement("button");
         let upgradeRows = document.getElementById("upgradeRows");
         upgrade.classList.add("upgradeButton");
+        upgrade.id = "upgrade" + this.uid;
         upgrade.innerText = this.name;
         upgrade.onclick = () => this.buyUpgrade();
         this.htmlTag = upgrade;
@@ -356,7 +555,6 @@ class Upgrade {
         } else {
             buildings[this.type].multiplier *= 2;
         }
-        console.log("bought!")
         this.bought = true;
         this.deleteHtml();
         findCps();

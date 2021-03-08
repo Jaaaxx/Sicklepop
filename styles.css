@@ -1,12 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Kavoon&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,700;1,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kavivanar&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
     background-color: sandybrown;
-    overflow: visible;
+    overflow: hidden;
 }
 
 #core_areas {
@@ -46,17 +49,10 @@ html, body {
     flex: 1;
 }
 
-.upColDiv > button {
-    font: 20px 'Open Sans', sans-serif;
-    font-weight: 800;
-    font-style: italic;
-    color: gray;
-    background-color: sandybrown;
-}
-
 #newsDiv {
     flex: 4;
     text-align: center;
+    overflow: hidden;
 }
 
 #newsText {
@@ -64,22 +60,55 @@ html, body {
     line-height: normal;
     font: 20px 'Open Sans', sans-serif;
     color: white;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.upColDiv > * {
+.upColButton {
     flex: 1;
+    font: 20px 'Open Sans', sans-serif;
+    font-weight: 800;
+    font-style: italic;
+    color: gray;
+    background-color: sandybrown;
+    cursor: pointer;
 }
+
 
 #rightArea {
     background-color: #46008b;
     overflow: auto;
-    padding: 1vw;
+}
+
+#upRightArea {
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+    height: 10vh;
+    margin: 0;
+}
+
+#upRightAreaLabel {
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+    font: 30px 'Open Sans', sans-serif;
+    color: white;
+    -webkit-text-stroke: 1px darkgray;
+    font-weight: 800;
+    line-height: 10vh;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 #buyRows {
-    display: grid;
-    grid-gap: 5px;
-    grid-template-columns: 2fr 1fr;
     background-color: #2196F3;
     padding: 10px;
     margin-top: 10px;
@@ -90,7 +119,7 @@ html, body {
     border: 1px solid rgba(0, 0, 0, 0.8);
     padding: 20px;
     font-size: 30px;
-    text-align: center;
+    text-align: left;
 }
 
 #upgradeRows {
@@ -99,7 +128,7 @@ html, body {
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     background-color: #2196F3;
     padding: 10px;
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 .upgradeButton {
@@ -118,5 +147,46 @@ html, body {
 
 .buyBuilding {
     cursor: pointer;
+    display: flex;
+    flex-direction: row;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
+.buyBuildingLabel {
+    font: 30px 'Open Sans', sans-serif;
+    font-style: italic;
+    color: darkslategray;
+}
+
+.buyBuildingCost {
+    font: 25px 'Ubuntu', sans-serif;
+    font-weight: 700;
+
+}
+
+.namePriceRows {
+    display: flex;
+    flex-direction: column;
+    flex: 3;
+}
+
+.ownedBuilding {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font: 30px 'Open Sans', sans-serif;
+    font-style: italic;
+    color: darkslategray;
+}
+
+#tooltipCanvasDiv {
+    height: 100%;
+    max-height: 90vh;
+    overflow: auto;
+}
