@@ -55,44 +55,6 @@ window.onload = function() {
         cps = r * multiplier;
     }
 
-    function setupCanvas() {
-        canvas = document.getElementById("cookieCanvas");
-        ctx  = canvas.getContext("2d");
-        rect = canvas.getBoundingClientRect();
-        // Make it visually fill the positioned parent
-        canvas.style.width ='100%';
-        canvas.style.height='100%';
-        // ...then set the internal size to match
-        canvas.width  = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-
-        // Text Labels Setup
-        ctx.font = "40px 'Kavoon'"
-        let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
-        let thmTCS = ctx.measureText(totalCookiesString);
-
-        ctx.font = "26px 'Kavoon'"
-        let cpsString = "per second: " + cps.toFixed(1)
-        let thmCPS = ctx.measureText(cpsString);
-
-        // Get height of text for spacing
-        textLabelsSize = thmTCS.actualBoundingBoxAscent + thmTCS.actualBoundingBoxDescent +
-            thmCPS.actualBoundingBoxAscent + thmCPS.actualBoundingBoxDescent;
-        // Tooltip canvas
-        ttcanvas = document.getElementById("tooltipCanvas");
-        ttctx = ttcanvas.getContext("2d");
-        ttrect = ttcanvas.getBoundingClientRect();
-        ttcanvas.style.width ='100%';
-        ttcanvas.style.height= '100%';
-        ttcanvas.width = ttcanvas.offsetWidth;
-        ttcanvas.height = ttcanvas.offsetHeight;
-        // Remove text blur
-        let scale = window.devicePixelRatio;
-        ttcanvas.width = Math.floor(ttcanvas.width * scale);
-        ttcanvas.height = Math.floor(ttcanvas.height * scale);
-        ttctx.scale(scale, scale);
-    }
-
     // Buildings Setup
     buildingsData.forEach(function(el) {
         buildings[el['name'].toLowerCase()] = new Building(el['baseCost'], el['baseProduction'], el['name'], el['description']);
@@ -105,18 +67,6 @@ window.onload = function() {
 
     let sortedUpgrades = [...upgrades].sort((a, b) => {return a.cost - b.cost});
 
-    // Runs when big cookie is clicked
-    function onBigCookieClick(clientX, clientY) {
-        cpc = clickMultiplier + (cps * cpsClicks);
-        totalCookies += cpc;
-        let time = 1000;
-        let x = clientX;
-        let y = clientY;
-        x += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
-        y += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
-        anSmallCookies.push({'timeLeft': time, 'maxTime': time, 'image': 'smallcookie.png', 'size': drawSmallCookie(x, y)})
-    }
-
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
         totalCookies += (cps / 100);
@@ -124,7 +74,7 @@ window.onload = function() {
 
         for (let b in buildings) {
             buildings[b].deactivateBuilding();
-            if (totalCookies >= buildings[b].baseCost / 2) {
+            if (buildings[b].hidden === true && totalCookies >= buildings[b].baseCost / 2) {
                 buildings[b].unhideBuilding();
             }
             if (totalCookies >= buildings[b].currentCost) {
@@ -149,6 +99,61 @@ window.onload = function() {
 
     function onWindowResize() {
         setupCanvas();
+        Object.values(buildings).forEach((e) => {
+            e.setupInnerCanvas();
+            e.drawInnerCanvas();
+        });
+    }
+
+
+    function setupCanvas() {
+        canvas = document.getElementById("cookieCanvas");
+        ctx  = canvas.getContext("2d");
+        rect = canvas.getBoundingClientRect();
+        // Make it visually fill the positioned parent
+        canvas.style.width ='100%';
+        canvas.style.height='100%';
+        // ...then set the internal size to match
+        canvas.width  = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        // Text Labels Setup
+        ctx.font = "40px 'Kavoon'"
+        let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
+        let thmTCS = ctx.measureText(totalCookiesString);
+
+        ctx.font = "26px 'Kavoon'"
+        let cpsString = "per second: " + parseInt(cps.toFixed(1)).toLocaleString();
+        let thmCPS = ctx.measureText(cpsString);
+
+        // Get height of text for spacing
+        textLabelsSize = thmTCS.actualBoundingBoxAscent + thmTCS.actualBoundingBoxDescent +
+            thmCPS.actualBoundingBoxAscent + thmCPS.actualBoundingBoxDescent;
+        // Tooltip canvas
+        ttcanvas = document.getElementById("tooltipCanvas");
+        ttctx = ttcanvas.getContext("2d");
+        ttrect = ttcanvas.getBoundingClientRect();
+        ttcanvas.style.width ='100%';
+        ttcanvas.style.height= '100%';
+        ttcanvas.width = ttcanvas.offsetWidth;
+        ttcanvas.height = ttcanvas.offsetHeight;
+        // Remove text blur
+        let scale = window.devicePixelRatio;
+        ttcanvas.width = Math.floor(ttcanvas.width * scale);
+        ttcanvas.height = Math.floor(ttcanvas.height * scale);
+        ttctx.scale(scale, scale);
+    }
+
+    // Runs when big cookie is clicked
+    function onBigCookieClick(clientX, clientY) {
+        cpc = clickMultiplier + (cps * cpsClicks);
+        totalCookies += cpc;
+        let time = 1000;
+        let x = clientX;
+        let y = clientY;
+        x += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
+        y += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
+        anSmallCookies.push({'timeLeft': time, 'maxTime': time, 'image': 'smallcookie.png', 'size': drawSmallCookie(x, y)})
     }
 
     function cookieCanvas() {
@@ -162,11 +167,13 @@ window.onload = function() {
         ctx.textAlign = "center";
 
         ctx.font = fontpx * 80 + "px 'Kavoon'"
-        let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
+        let totalCookiesString = parseInt(totalCookies.toFixed(1)).toLocaleString() + " cookies";
         ctx.fillText(totalCookiesString, canvas.width / 2, rect.top + canvas.height * 0.01);
 
         ctx.font = fontpx * 50 + "px 'Kavoon'"
-        let cpsString = (cps < 10 && cps !== 0) ? "per second: " + cps.toFixed(1) : "per second: " + cps.toFixed(0);
+        let cpsString = (cps < 10 && cps !== 0) ?
+            "per second: " + parseInt(cps.toFixed(1)).toLocaleString()
+            : "per second: " + parseInt(cps.toFixed()).toLocaleString();
         ctx.fillText(cpsString, canvas.width / 2, rect.top + canvas.height * 0.01 + textLabelsSize * 1.25);
 
         // Big Cookie
@@ -486,6 +493,7 @@ window.onload = function() {
     setupCanvas();
     cookieCanvas();
     setupCanvas();
+    Object.values(buildings).forEach((e) => e.setupInnerCanvas());
 }
 
 class Building {
@@ -499,11 +507,13 @@ class Building {
     labelButton;
     priceButton;
     ownedButton;
+    canvasDiv;
     canvas;
     ctx;
     amount;
     production;
     multiplier = 1;
+    hidden = true;
 
     constructor(baseCost, baseProduction, name, description) {
         this.baseCost = baseCost;
@@ -513,10 +523,20 @@ class Building {
         this.amount = 0;
         this.baseProduction = baseProduction;
 
-        if (name === "Grandma") {
-            // Inner canvas
-            this.canvas = document.getElementById(name.toLowerCase() + "Canvas");
+        if (this.name !== "Cursor") {
+            this.canvasDiv = document.createElement("div");
+            this.canvasDiv.classList.add("innerCanvasDiv");
+            document.getElementById("lowerCenter").appendChild(this.canvasDiv);
+            this.canvas = document.createElement("canvas");
+            this.canvas.classList.add("innerCanvas");
+            this.canvas.id = this.name.toLowerCase() + "Canvas";
+            this.canvas.style.width ='100%';
+            this.canvas.style.height='100%';
+            this.canvasDiv.appendChild(this.canvas);
+
             this.ctx = this.canvas.getContext("2d");
+        } else {
+            this.hidden = false;
         }
 
         this.buyButton = document.createElement("div");
@@ -547,10 +567,9 @@ class Building {
 
         this.buyButton.onclick = () => this.buyBuilding();
         if (this.name !== 'Cursor')
-           this.hideBuilding();
+            this.hideBuilding();
         this.deactivateBuilding();
         this.buyBuilding();
-
     }
 
     buyBuilding() {
@@ -567,7 +586,7 @@ class Building {
             e.checkAvailable();
         })
         findCps();
-        if (Object.keys(images).length > 0 && this.name === "Grandma") {
+        if (Object.keys(images).length > 0 && this.canvas) {
             this.drawInnerCanvas();
         }
     }
@@ -584,25 +603,51 @@ class Building {
         this.ownedButton.innerText = this.amount.toLocaleString();
     }
 
+    setupInnerCanvas() {
+        if (this.name === "Cursor")
+            return;
+        this.canvas.width = this.canvas.offsetWidth;
+        this.canvas.height = this.canvas.offsetHeight;
+    }
+
     drawInnerCanvas() {
+        if (!this.ctx)
+            return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
         let img = images[this.name.toLowerCase() + ".png"];
+
         let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
-        scale /= 1.45;
+        scale /= 1;
 
         let width = img.width * scale;
         let height = img.height * scale;
 
         let x = 0;
         let y = 0;
-        this.ctx.drawImage(img, x, y, width, height);
+
+        for (let i = 0; i < this.amount; i++) {
+            if (x > this.canvas.width)
+                break;
+            this.ctx.drawImage(img, x, y, width, height);
+            x += width;
+        }
     }
 
     unhideBuilding() {
+        if (this.name === "Cursor")
+            return;
         this.buyButton.classList.remove('hidden');
+        this.canvasDiv.classList.remove('hidden');
+        this.hidden = false;
+        this.setupInnerCanvas();
     }
 
     hideBuilding() {
+        if (this.name === "Cursor")
+            return;
         this.buyButton.classList.add('hidden');
+        this.canvasDiv.classList.add('hidden');
     }
 
     activateBuilding() {

@@ -1,7 +1,11 @@
 const imageData = [
     "cookie.png",
     "smallcookie.png",
-    "grandma.png"
+    "grandma.png",
+    "farm.png",
+    "mine.png",
+    "factory.png",
+    "bank.png"
 ]
 
 const upgradeData = [
@@ -101,9 +105,15 @@ const buildingsData = [
         "description": "Mines cookies from inside the earth's surface."
     },
     {
-        "name": "Bank",
+        "name": "Factory",
         "baseCost": 100000,
         "baseProduction": 1000,
+        "description": "Mass produces cookies."
+    },
+    {
+        "name": "Bank",
+        "baseCost": 1000000,
+        "baseProduction": 10000,
         "description": "New banks allow for quick investment of cash into cookies."
     }
 ]
