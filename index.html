@@ -8,7 +8,8 @@
     <script type="text/javascript" src="data.js"></script>
 </head>
 <body>
-<div id="core_areas">
+<div id="cover" class="hidden">
+<div id="core_areas" class="hidden">
     <div id="leftArea">
         <div id="clickable-div-bigCookie"></div>
         <canvas id="cookieCanvas"></canvas>
@@ -19,7 +20,7 @@
                 <button class="upColButton">Options</button>
                 <button class="upColButton">Stats</button>
             </div>
-            <div class="upColDiv" id="newsDiv">
+            <div id="newsDiv">
                 <p id="newsText"></p>
             </div>
             <div class="upColDiv">
@@ -30,43 +31,29 @@
         <div id="tooltipCanvasDiv">
             <canvas id="tooltipCanvas"></canvas>
         </div>
+        <div id="lowerCenter">
+            <div class="innerCanvasDiv">
+                <canvas class="innerCanvas" id="grandmaCanvas"></canvas>
+            </div>
+            <div class="innerCanvasDiv">
+                <canvas class="innerCanvas" id="farmCanvas"></canvas>
+            </div>
+            <div class="innerCanvasDiv">
+                <canvas class="innerCanvas" id="mineCanvas"></canvas>
+            </div>
+            <div class="innerCanvasDiv">
+                <canvas class="innerCanvas" id="bankCanvas"></canvas>
+            </div>
+        </div>
     </div>
     <div id="rightArea">
         <div id="upRightArea">
             <h1 id="upRightAreaLabel">Upgrades/Buildings</h1>
         </div>
         <div id="upgradeRows"></div>
-        <div id="buyRows">
-            <div class="buyBuilding" id="buyCursor">
-                <div class="namePriceRows">
-                    <span class="buyBuildingLabel">Cursor</span><br>
-                    <span class="buyBuildingCost" id="priceCursor">$ 2,343</span>
-                </div>
-                <span class="ownedBuilding" id="ownedCursor">0</span>
-            </div>
-            <div class="buyBuilding" id="buyGrandma">
-                <div class="namePriceRows">
-                    <span class="buyBuildingLabel">Grandma</span><br>
-                    <span class="buyBuildingCost" id="priceGrandma">$ 2,343</span>
-                </div>
-                <span class="ownedBuilding" id="ownedGrandma">0</span>
-            </div>
-            <div class="buyBuilding" id="buyFarm">
-                <div class="namePriceRows">
-                    <span class="buyBuildingLabel">Farm</span><br>
-                    <span class="buyBuildingCost" id="priceFarm">$ 2,343</span>
-                </div>
-                <span class="ownedBuilding" id="ownedFarm">0</span>
-            </div>
-            <div class="buyBuilding" id="buyMine">
-                <div class="namePriceRows">
-                    <span class="buyBuildingLabel">Mine</span><br>
-                    <span class="buyBuildingCost" id="priceMine">$ 2,343</span>
-                </div>
-                <span class="ownedBuilding" id="ownedMine">0</span>
-            </div>
-        </div>
+        <div id="buyRows"></div>
     </div>
+</div>
 </div>
 </body>
 </html>

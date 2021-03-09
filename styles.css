@@ -8,128 +8,28 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: sandybrown;
+    background-color: ghostwhite;
     overflow: hidden;
 }
+
 
 #core_areas {
     display: flex;
     height: 100vh;
 }
 
+#cover {
+    position: fixed; height: 100%; width: 100%; top:0; left: 0; z-index:9999;
+}
+
+/* Left Area */
 #leftArea {
     background-color: #00468b;
     padding: 2vw;
     position: relative;
     text-align: center;
     flex: 1;
-}
-
-#centerArea {
-    background-color: #00008b;
-    flex: 2;
-}
-
-#upperCenter {
-    height: 10vh;
-    min-height: 75px;
-    background-color: darkcyan;
-    display: flex;
-    flex-direction: row;
-}
-
-.upColDiv {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    flex: 1;
-}
-
-#newsDiv {
-    flex: 4;
-    text-align: center;
-    overflow: hidden;
-}
-
-#newsText {
-    display: inline-block;
-    line-height: normal;
-    font: 20px 'Open Sans', sans-serif;
-    color: white;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.upColButton {
-    flex: 1;
-    font: 20px 'Open Sans', sans-serif;
-    font-weight: 800;
-    font-style: italic;
-    color: gray;
-    background-color: sandybrown;
-    cursor: pointer;
-}
-
-
-#rightArea {
-    background-color: #46008b;
-    overflow: auto;
-    flex: 0.75;
-}
-
-#upRightArea {
-    justify-content: center;
-    align-items: center;
-    vertical-align: middle;
-    height: 10vh;
-    margin: 0;
-}
-
-#upRightAreaLabel {
-    margin: 0;
-    text-align: center;
-    vertical-align: middle;
-    font: 30px 'Open Sans', sans-serif;
-    color: white;
-    -webkit-text-stroke: 1px darkgray;
-    font-weight: 800;
-    line-height: 10vh;
-
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-#buyRows {
-    background-color: #2196F3;
-    padding: 10px;
-    margin-top: 10px;
-}
-
-#buyRows > * {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    font-size: 30px;
-    text-align: left;
-}
-
-#upgradeRows {
-    display: grid;
-    grid-gap: 5px;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    background-color: #2196F3;
-    padding: 10px;
-    margin-top: 0;
-}
-
-.upgradeButton {
-    cursor: pointer;
+    border-right: 0.75vw #4c2e1a solid;
 }
 
 #clickable-div-bigCookie {
@@ -142,10 +42,131 @@ html, body {
     /*border: 3px dotted white;*/
 }
 
-.buyBuilding {
-    cursor: pointer;
+/* Middle Area */
+#centerArea {
+    background-color: #00008b;
+    flex: 2;
+    height: 100%;
+}
+
+#upperCenter {
+    height: 10vh;
+    min-height: 75px;
+    background-color: darkcyan;
     display: flex;
     flex-direction: row;
+    border-bottom: 0.75vw #4c2e1a solid;
+}
+
+.upColDiv {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+}
+
+#newsDiv {
+    flex: 4;
+    overflow: hidden;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#newsText {
+    font: 20px 'Open Sans', sans-serif;
+    color: white;
+    text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    margin: 0;
+}
+
+.upColButton {
+    flex: 1;
+    font: 20px 'Open Sans', sans-serif;
+    font-weight: 800;
+    font-style: italic;
+    color: gray;
+    background-color: #f4a460;
+    cursor: pointer;
+    outline: none;
+}
+
+.upColButton:hover {
+    background-color: #db853d;
+}
+
+.upColButton:active {
+    background-color: #cf9e75;
+}
+
+
+#tooltipCanvasDiv {
+    height: 100%;
+    max-height: 100vh;
+    width: 48%;
+    position: fixed;
+    bottom: 0;
+    pointer-events: none;
+}
+
+
+#lowerCenter {
+    display: flex;
+    flex-direction: column;
+    overflow: scroll;
+    height: 86vh;
+}
+
+.innerCanvasDiv {
+    width: 100%;
+    flex: 1;
+    height: 20vh;
+    max-height: 20vh;
+    background-color: indianred;
+    border-bottom: 0.75vw #4c2e1a solid;
+}
+
+.innerCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Right Area */
+
+#rightArea {
+    background-color: #46008b;
+    border-left: 0.75vw #4c2e1a solid;
+    overflow: auto;
+    flex: 1;
+}
+
+#upRightArea {
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+    height: 10vh;
+    min-height: 75px;
+    margin: 0;
+    overflow: hidden;
+}
+
+#upRightAreaLabel {
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+    font: 2vw 'Open Sans', sans-serif;
+    color: white;
+    -webkit-text-stroke: 1px darkgray;
+    font-weight: 800;
+    line-height: 10vh;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -154,22 +175,81 @@ html, body {
     user-select: none;
 }
 
+#upgradeRows {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 5px;
+    background-color: #2196F3;
+    padding: 10px;
+    margin-top: 0;
+}
+
+.upgradeButton {
+    object-fit: cover;
+    cursor: pointer;
+    max-width: 100%;
+    height: auto;
+    border: 1px brown solid;
+    background-color: mistyrose;
+}
+
+.upgradeButton:hover:not(.disabled) {
+    background-color: rosybrown;
+}
+
+.upgradeButton:active:not(.disabled) {
+    background-color: #886a6a;
+}
+
+#buyRows {
+    background-color: #2196F3;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.buyBuilding {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    text-align: left;
+    height: 11vh;
+
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.buyBuilding:hover:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.buyBuilding:active:not(.disabled) {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
 .buyBuildingLabel {
-    font: 30px 'Open Sans', sans-serif;
+    font: 2vw 'Open Sans', sans-serif;
     font-style: italic;
     color: darkslategray;
+    padding-left: 1vw;
 }
 
 .buyBuildingCost {
-    font: 25px 'Ubuntu', sans-serif;
+    font: 1.5vw 'Ubuntu', sans-serif;
     font-weight: 700;
-
+    padding-left: 1vw;
 }
 
 .namePriceRows {
-    display: flex;
-    flex-direction: column;
     flex: 3;
+    height: 100%;
+    max-height: 100%;
 }
 
 .ownedBuilding {
@@ -177,13 +257,16 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font: 30px 'Open Sans', sans-serif;
+    font: 2.5vw 'Open Sans', sans-serif;
     font-style: italic;
     color: darkslategray;
 }
 
-#tooltipCanvasDiv {
-    height: 100%;
-    max-height: 90vh;
-    overflow: auto;
+
+.hidden {
+    display: none;
+}
+
+.disabled {
+    opacity: 60%;
 }
