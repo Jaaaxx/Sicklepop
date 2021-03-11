@@ -1,5 +1,7 @@
 // Global variables
 let totalCookies = 0;
+let runCookies = 0;
+let lifetimeCookies = 0;
 let growthRate = 1.15;
 let clickMultiplier = 1;
 let cpsClicks = 0.00;
@@ -11,12 +13,17 @@ let multiplier = 1;
 let upgrades = [];
 let boughtUpgrades = [];
 let findCps;
+let formatSci;
+let plrl;
 let images = {};
 let upgradeColors = {};
-
+let formatNums = [' million',' billion',' trillion',' quadrillion',' quintillion',' sextillion',' septillion',' octillion',' nonillion'];
+let tickSpeed = 10;
 
 function addCookies(num) {
     totalCookies += num;
+    runCookies += num;
+    lifetimeCookies += num;
 }
 
 window.onload = function() {
@@ -25,6 +32,17 @@ window.onload = function() {
     let newsDiv = document.getElementById("newsDiv");
     let newsTimer = 10000;
     let currTooltip;
+
+    // Number formatting setup (thanks cookie clicker)
+    let prefixes=['','un','duo','tre','quattuor','quin','sex','septen','octo','novem'];
+    let suffixes=['decillion','vigintillion','trigintillion','quadragintillion','quinquagintillion','sexagintillion','septuagintillion','octogintillion','nonagintillion'];
+    for (let i in suffixes)
+    {
+        for (let ii in prefixes)
+        {
+            formatNums.push(' '+prefixes[ii]+suffixes[i]);
+        }
+    }
 
     // Canvas Setup
     let canvas;
@@ -40,19 +58,48 @@ window.onload = function() {
     let ttctx;
     let ttrect;
 
-    // News setup
-    newsDiv.onclick = function() {
-        generateNews();
-    }
+    // Element-specific event setup
+    newsDiv.onclick = function() { generateNews(); }
+    document.getElementById("prestigeButton").onclick = function() { prestige(); }
+    document.getElementById("prestigeButton").addEventListener("mouseover", function(e) { currTooltip = {"x": e.clientX, "y": e.clientY, "upgrade": "prestige"}; })
+    document.getElementById("prestigeButton").addEventListener("mouseout", function() { currTooltip = null; })
 
     // Global function setup
     findCps = function() {
         let r = 0;
         for (let b in buildings) {
             buildings[b].determineCost();
-            r += buildings[b].production;
+            r += buildings[b].production * buildings[b].amount;
         }
         cps = r * multiplier;
+    }
+    formatSci = function(num, decDigits = 0) {
+        if (num < 1)
+            return Number(num.toFixed(1)).toLocaleString();
+        if (num < 1000000)
+            return Number(num.toFixed(decDigits)).toLocaleString();
+        num = Number(num);
+        let sciNum = num.toExponential(6);
+        let exp = parseInt(sciNum.substring(9));
+        let sciExp = Math.floor((exp-6) / 3);
+        let res;
+        if ((exp-6) % 3 === 0) {
+            res = sciNum.substring(0,1) + "." + sciNum.substring(2, 5);
+        } else if ((exp-6) % 3 === 1) {
+            res = sciNum.substring(0,1) + sciNum.substring(2, 3) + "." + sciNum.substring(3, 6);
+        } else if ((exp-6) % 3 === 2) {
+            res = sciNum.substring(0,1) + sciNum.substring(2, 4) + "." + sciNum.substring(4, 7);
+        }
+        if (res.substring(res.length - 3) === "000")
+            res = res.substring(0, res.length - 4);
+        return res + formatNums[sciExp];
+    }
+    plrl = function(num, string) {
+        if (num === 1)
+            return string;
+        if (string.substr(string.length - 1) === "y")
+            return string.substr(0, string.length - 1) + "ies"
+        return string + "s";
     }
 
     // Buildings Setup
@@ -69,8 +116,11 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        totalCookies += (cps / 100);
-        newsTimer += 10;
+        totalCookies += cps / (tickSpeed * 10);
+        runCookies += cps / (tickSpeed * 10);
+        lifetimeCookies += cps / (tickSpeed * 10);
+        newsTimer += tickSpeed;
+
 
         for (let b in buildings) {
             buildings[b].deactivateBuilding();
@@ -89,13 +139,13 @@ window.onload = function() {
             e.checkAvailable();
         })
 
-        if (newsTimer >= 10000) {
+        if (newsTimer >= (tickSpeed * 1000)) {
             newsTimer = 0;
             generateNews();
         }
         // Drawing function
         cookieCanvas();
-    }, 10)}
+    }, tickSpeed)}
 
     function onWindowResize() {
         setupCanvas();
@@ -119,11 +169,11 @@ window.onload = function() {
 
         // Text Labels Setup
         ctx.font = "40px 'Kavoon'"
-        let totalCookiesString = parseInt(totalCookies.toFixed()).toLocaleString() + " cookies";
+        let totalCookiesString = formatSci(totalCookies) + plrl(totalCookies, " cookie");
         let thmTCS = ctx.measureText(totalCookiesString);
 
         ctx.font = "26px 'Kavoon'"
-        let cpsString = "per second: " + parseInt(cps.toFixed(1)).toLocaleString();
+        let cpsString = "per second: " + formatSci(cps, 1);
         let thmCPS = ctx.measureText(cpsString);
 
         // Get height of text for spacing
@@ -148,6 +198,8 @@ window.onload = function() {
     function onBigCookieClick(clientX, clientY) {
         cpc = clickMultiplier + (cps * cpsClicks);
         totalCookies += cpc;
+        runCookies += cpc;
+        lifetimeCookies += cpc;
         let time = 1000;
         let x = clientX;
         let y = clientY;
@@ -166,14 +218,16 @@ window.onload = function() {
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
 
-        ctx.font = fontpx * 80 + "px 'Kavoon'"
-        let totalCookiesString = parseInt(totalCookies.toFixed(1)).toLocaleString() + " cookies";
+        ctx.font = fontpx * 60 + "px 'Kavoon'"
+        let totalCookiesString;
+        totalCookiesString = formatSci(totalCookies) + plrl(totalCookies, " cookie");
+
         ctx.fillText(totalCookiesString, canvas.width / 2, rect.top + canvas.height * 0.01);
 
         ctx.font = fontpx * 50 + "px 'Kavoon'"
         let cpsString = (cps < 10 && cps !== 0) ?
-            "per second: " + parseInt(cps.toFixed(1)).toLocaleString()
-            : "per second: " + parseInt(cps.toFixed()).toLocaleString();
+            "per second: " + formatSci(cps, 1)
+            : "per second: " + formatSci(cps);
         ctx.fillText(cpsString, canvas.width / 2, rect.top + canvas.height * 0.01 + textLabelsSize * 1.25);
 
         // Big Cookie
@@ -224,7 +278,7 @@ window.onload = function() {
             let el = anSmallCookies[Math.abs(c - anSmallCookies.length)];
             let timeLeft = el['timeLeft'];
 
-            el['timeLeft'] = timeLeft - 10;
+            el['timeLeft'] = timeLeft - tickSpeed;
             let image = images[el['image']];
             let x = el['size'][0];
             let y = el['size'][1];
@@ -237,8 +291,8 @@ window.onload = function() {
             ctx.fillStyle = "white";
 
             ctx.font = fontpx * 40 + "px 'Kavoon'"
-            let numEarned = cpc < 10 ? "+" + parseInt(cpc.toFixed(2)).toLocaleString()
-                : "+" + parseInt(cpc.toFixed()).toLocaleString();
+            let numEarned = cpc < 10 ? "+" + formatSci(cpc, 2)
+                : "+" + formatSci(cpc)
             ctx.fillText(numEarned, x + w + window.innerWidth * 0.005, y + h / 2);
 
 
@@ -250,123 +304,130 @@ window.onload = function() {
         }
         // Tooltip
         if (currTooltip) {
-            let upgrade = currTooltip['upgrade']
+            let u = currTooltip['upgrade']
+            let ttStrings;
 
-            if (upgrade instanceof Building) {
+            if (u instanceof Upgrade) {
+                ttStrings = [
+                    [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
+                    [true, fontpx * 50 + "px 'Open Sans'", "$" + formatSci(u.cost), 'gold'],
+                    [false, fontpx * 40 + "px 'Open Sans'", "[Upgrade]", 'lightgray'],
+                    [false,fontpx * 36 + "px 'Open Sans'", u.info, 'navajowhite'],
+                    [false, fontpx * 36 + "px 'Open Sans'", '“' + u.description + '”', 'gray']
+                ];
+            } else if (u instanceof Building) {
+                ttStrings = [
+                    [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
+                    [true, fontpx * 50 + "px 'Open Sans'", "$" + formatSci(u.currentCost), 'gold'],
+                    [false, fontpx * 40 + "px 'Open Sans'", "[Owned: " + formatSci(u.amount) + "]", 'lightgray'],
+                    [false, fontpx * 40 + "px 'Open Sans'", u.description, 'navajowhite'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + formatSci(u.production) + plrl(u.production, " cookie") + "</> per second.", '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount) + plrl(u.production * u.amount, " cookie") + "</> per second.", '#a5a49f'],
+                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (cps !== 0 ? (((u.production*u.amount)/cps)*100).toFixed(0) : cps) + "% of cps]", '#f1f1f1']
+                ];
+            } else if (u === "prestige") {
+                ttStrings = [
+                    [false, fontpx * 36 + "px 'Open Sans'", "Ascending now would grant you<#f1f1f1" + (checkPrestige()[0] < 1 ? " no prestige</>." : formatSci(checkPrestige()[0]) + " prestige levels</> (+" + formatSci(checkPrestige()[0]) + "% cps)."), '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "You need<#f1f1f1 " + formatSci(checkPrestige()[1]) + "</> more cookies for the next level.", '#a5a49f'],
+                ];
 
-                // Measure text size beforehand
-                ttctx.font = fontpx * 50 + "px 'Open Sans'";
-                let nameSizeMeasure = ttctx.measureText(upgrade.name);
-                let nameSize = nameSizeMeasure.actualBoundingBoxAscent;
-                let nameWidth = nameSizeMeasure.actualBoundingBoxRight;
-                ttctx.font = fontpx * 40 + "px 'Open Sans'";
-                let ownedText = "[Owned: " + upgrade.amount + "]";
-                let ownedSizeMeasure = ttctx.measureText(ownedText);
-                let ownedSize = ownedSizeMeasure.actualBoundingBoxAscent;
-                let ownedWidth = ownedSizeMeasure.actualBoundingBoxRight;
-                ttctx.font = fontpx * 40 + "px 'Open Sans'";
-                let descSizeMeasure = ttctx.measureText(upgrade.description);
-                let descSize = descSizeMeasure.actualBoundingBoxAscent;
-                let descWidth = descSizeMeasure.actualBoundingBoxRight;
+            }
 
-                let marg = 15;
-                let w = Math.max(nameWidth, ownedWidth, descWidth) + marg * 2;
-                let x = ttcanvas.width - w - 1;
-                let y = currTooltip['y'] - ttrect.top - 20;
-
-                // Tooltip box
-                drawBorder(x, y, w, nameSize + ownedSize + descSize + marg * 4, 1)
+            let marg = 15;
+            let boxHeight = marg;
+            let boxWidth = 0;
 
 
-                ttctx.fillStyle = 'saddlebrown';
-                ttctx.fillRect(x, y, w, nameSize + ownedSize + descSize + marg * 4)
+            for (let i = 0; i < ttStrings.length; i++) {
+                tooltipMeasure(ttStrings[i]);
+                if (ttStrings[i][0] === false) {
+                    boxHeight += ttStrings[i][4] + marg;
+                    if (ttStrings[i][5] > boxWidth)
+                        boxWidth = ttStrings[i][5];
+                } else {
+                    if (ttStrings[i][5] + ttStrings[i-1][5] > boxWidth)
+                        boxWidth = ttStrings[i][5] + ttStrings[i-1][5] + marg;
+                }
+            }
 
-                // Name
-                ttctx.fillStyle = 'white';
-                ttctx.font = fontpx * 50 + "px 'Open Sans'"
-                nameSize += marg;
-                ttctx.fillText(upgrade.name, x + marg, y + nameSize);
+            let distance = document.getElementById("upgradeRows").getBoundingClientRect().top;
+            let uCH = Math.max(window.innerHeight * 0.1, 75);
 
-                // Owned
-                ttctx.fillStyle = 'lightgray';
-                ttctx.font = fontpx * 40 + "px 'Open Sans'"
-                nameSize += marg;
+            let w = boxWidth + marg * 2;
+            let x = ttcanvas.width - w - 1;
+            let y = 0;
 
-                ttctx.fillText(ownedText, x + marg, y + nameSize + ownedSize);
+            if (u instanceof Upgrade) {
+                if (distance >= 0)
+                    y = Math.min(distance, uCH);
+                else
+                    y = uCH;
+            } else if (u instanceof Building) {
+                if ((currTooltip['y'] + ttrect.top - marg) + boxHeight > window.innerHeight)
+                    y = window.innerHeight - boxHeight - 1;
+                else
+                    y = currTooltip['y'] + ttrect.top - marg;
+            } else if (u === "prestige") {
+                y = uCH;
+            }
 
-                // Description
-                ttctx.fillStyle = 'gray';
-                ttctx.font = fontpx * 40 + "px 'Open Sans'"
-                nameSize += marg;
+            let totalHeight = y;
 
-                ttctx.fillText(upgrade.description, x + marg, y + nameSize + ownedSize + descSize);
-            } else if (upgrade instanceof Upgrade) {
-                // Measure text size beforehand
-                ttctx.fillStyle = 'white';
-                ttctx.font = fontpx * 50 + "px 'Open Sans'";
-                let nameSizeMeasure = ttctx.measureText(upgrade.name);
-                let nameSize = nameSizeMeasure.actualBoundingBoxAscent;
-                let nameWidth = nameSizeMeasure.actualBoundingBoxRight;
-                ttctx.font = fontpx * 50 + "px 'Open Sans'";
-                let costSizeMeasure = ttctx.measureText("$" + parseInt(upgrade.cost.toFixed()).toLocaleString());
-                let costWidth = costSizeMeasure.actualBoundingBoxRight;
-                ttctx.font = fontpx * 40 + "px 'Open Sans'"
-                let ownedSizeMeasure = ttctx.measureText("[Upgrade]");
-                let ownedSize = ownedSizeMeasure.actualBoundingBoxAscent;
-                let ownedWidth = ownedSizeMeasure.actualBoundingBoxRight;
-                ttctx.font = fontpx * 35 + "px 'Open Sans'"
-                let infoSizeMeasure = ttctx.measureText(upgrade.info);
-                let infoSize = infoSizeMeasure.actualBoundingBoxAscent
-                let infoWidth = infoSizeMeasure.actualBoundingBoxRight;
-                ttctx.font = fontpx * 35 + "px 'Open Sans'"
-                let descSizeMeasure = ttctx.measureText('“' + upgrade.description + '”');
-                let descSize = descSizeMeasure.actualBoundingBoxAscent
-                let descWidth = descSizeMeasure.actualBoundingBoxRight;
+            // Tooltip box
+            drawBorder(x, y, w, boxHeight, 1)
 
-                let marg = 15;
-                let w = Math.max(nameWidth + (marg * 2) + costWidth, ownedWidth, infoWidth, descWidth) + marg * 2
-                let h = nameSize + ownedSize + infoSize + descSize + marg * 5;
-                let x = ttcanvas.width - w - 1;
-                let y = Math.max(window.innerHeight / 10, 75) + 1;
-                if (currTooltip['y'] < y)
-                    y = 5;
+            ttctx.fillStyle = 'saddlebrown';
+            ttctx.fillRect(x, y, w, boxHeight)
 
-                // Draw box/border
-                drawBorder(x, y, w, h, 1)
-                ttctx.fillStyle = 'saddlebrown';
-                ttctx.fillRect(x, y, w, h)
 
-                // Name
-                ttctx.fillStyle = 'white';
-                ttctx.font = fontpx * 50 + "px 'Open Sans'";
-                nameSize += marg;
-                ttctx.fillText(upgrade.name, x + marg, y + nameSize);
+            for (let i = 0; i < ttStrings.length; i++) {
+                if (ttStrings[i][0] === false)
+                    totalHeight += ttStrings[i][4] + marg;
+                ttctx.fillStyle = ttStrings[i][3];
+                ttctx.font = ttStrings[i][1];
+                let textPieces = [];
+                // If some text is highlighted
+                if (ttStrings[i][2].includes("</>")) {
+                    let ind = getIndicesOf("<#", ttStrings[i][2], false);
+                    let ind2 = getIndicesOf("</>", ttStrings[i][2], false);
 
-                // Cost
-                ttctx.fillStyle = 'gold';
-                ttctx.font = fontpx * 50 + "px 'Open Sans'";
-                ttctx.fillText("$" + parseInt(upgrade.cost.toFixed()).toLocaleString(), x + w - costWidth - marg, y + nameSize);
-
-                // Owned
-                ttctx.fillStyle = 'lightgray';
-                ttctx.font = fontpx * 40 + "px 'Open Sans'"
-                nameSize += marg;
-
-                ttctx.fillText("[Upgrade]", x + marg, y + nameSize + ownedSize);
-
-                // Info
-                ttctx.fillStyle = 'navajowhite';
-                ttctx.font = fontpx * 35 + "px 'Open Sans'"
-                nameSize += marg;
-
-                ttctx.fillText(upgrade.info, x + marg, y + nameSize + ownedSize + infoSize);
-
-                // Description
-                ttctx.fillStyle = 'gray';
-                ttctx.font = fontpx * 35 + "px 'Open Sans'"
-                nameSize += marg;
-
-                ttctx.fillText('“' + upgrade.description + '”', x + w - descWidth - 10, y + nameSize + ownedSize + infoSize + descSize);
+                    for (let j = 0; j < ind.length; j++) {
+                        let id = ind[j];
+                        let id2 = ind2[j];
+                        let color = ttStrings[i][2].substr(id + 1, 7);
+                        let t1;
+                        if (j === 0)
+                            t1 = ttStrings[i][2].substring(0, id);
+                        else
+                            t1 = ttStrings[i][2].substring(ind2[j - 1] + 3, id);
+                        let t2 = ttStrings[i][2].substring(id + 8, id2);
+                        textPieces.push([t1, ttStrings[i][3]]);
+                        textPieces.push([t2, color]);
+                    }
+                    textPieces.push([ttStrings[i][2].substr(ind2[ind2.length - 1] + 3), ttStrings[i][3]]);
+                }
+                if (textPieces.length === 0)
+                    if (ttStrings[i][0] === true)
+                        ttctx.fillText(ttStrings[i][2], x + w - ttStrings[i][5] - marg, totalHeight);
+                    else
+                        ttctx.fillText(ttStrings[i][2], x + marg, totalHeight);
+                else {
+                    // console.log(textPieces);
+                    let offset = 0;
+                    if (ttStrings[i][0] === true) {
+                        for (let j = 0; j < textPieces.length; j++) {
+                            ttctx.fillStyle = textPieces[j][1];
+                            ttctx.fillText(textPieces[j][0], x + w - ttStrings[i][5] - marg + offset, totalHeight);
+                            offset += quickMeasureWidth(textPieces[j][0]);
+                        }
+                    } else {
+                        for (let j = 0; j < textPieces.length; j++) {
+                            ttctx.fillStyle = textPieces[j][1];
+                            ttctx.fillText(textPieces[j][0], x + marg + offset, totalHeight);
+                            offset += quickMeasureWidth(textPieces[j][0]);
+                        }
+                    }
+                }
             }
         }
     }
@@ -375,6 +436,45 @@ window.onload = function() {
     function drawBorder(xPos, yPos, width, height, thickness = 1) {
         ttctx.fillStyle = 'white';
         ttctx.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
+    }
+
+    function tooltipMeasure(i) {
+        let font = i[1];
+        let text = i[2];
+
+        if (text.includes("</>")) {
+            text = text.substring(0, text.indexOf("<#")) + text.substr(text.indexOf("<#") + 7);
+            text = text.replace("</>", "");
+        }
+
+        ttctx.font = font;
+        let sizeMeasure = ttctx.measureText(text);
+        let height = sizeMeasure.actualBoundingBoxAscent;
+        let width = sizeMeasure.actualBoundingBoxRight;
+
+        i.push(height, width);
+    }
+
+    function quickMeasureWidth(text) {
+        let sizeMeasure = ttctx.measureText(text);
+        return sizeMeasure.actualBoundingBoxRight;
+    }
+
+    function getIndicesOf(searchStr, str, caseSensitive) {
+        let searchStrLen = searchStr.length;
+        if (searchStrLen === 0) {
+            return [];
+        }
+        let startIndex = 0, index, indices = [];
+        if (!caseSensitive) {
+            str = str.toLowerCase();
+            searchStr = searchStr.toLowerCase();
+        }
+        while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+            indices.push(index);
+            startIndex = index + searchStrLen;
+        }
+        return indices;
     }
 
     // Convert between number ranges
@@ -394,7 +494,6 @@ window.onload = function() {
 
         return([x - rect.left - (width / 2), y - rect.top - (height / 2), width, height]);
     }
-
 
     function onDocumentClick(event) {
         if (event.target === bigCookieClickable) {
@@ -426,7 +525,8 @@ window.onload = function() {
                 return;
             currTooltip = {"x": event.clientX, "y": event.clientY, "upgrade": b};
         } else {
-            currTooltip = null;
+            if (currTooltip && currTooltip['upgrade'] !== "prestige")
+                currTooltip = null;
         }
     }
 
@@ -477,6 +577,20 @@ window.onload = function() {
                 callback();
             }
         }
+    }
+
+    function prestige() {
+        let prestigePoints = checkPrestige();
+        console.log(prestigePoints);
+    }
+
+    function checkPrestige() {
+        let chips = Math.cbrt(lifetimeCookies / (10 ** 12));
+        // How many cookies chips are worth
+        let chipsWorth = Math.ceil((chips ** 3) * (10 ** 12));
+        let nextChipWorth = (Math.floor(chips + 1) ** 3) * (10 ** 12);
+
+        return [chips, nextChipWorth - lifetimeCookies];
     }
 
 
@@ -592,15 +706,15 @@ class Building {
     }
 
     determineCost() {
-        this.currentCost = parseInt((this.baseCost * (growthRate ** this.amount)).toFixed()); // Formula for determining cost
+        this.currentCost = Number((this.baseCost * (growthRate ** this.amount)).toFixed()); // Formula for determining cost
         if (this.name === "Cursor") {
-            this.production = (clickMultiplier + (cps * cpsClicks)) * this.amount / 10;
+            this.production = (clickMultiplier + (cps * cpsClicks)) / 10;
         } else {
             // Formula for determining production
-            this.production = (this.baseProduction * this.amount) * this.multiplier;
+            this.production = (this.baseProduction) * this.multiplier;
         }
-        this.priceButton.innerText = "$ " + this.currentCost.toLocaleString();
-        this.ownedButton.innerText = this.amount.toLocaleString();
+        this.priceButton.innerText = "$ " + formatSci(this.currentCost);
+        this.ownedButton.innerText = formatSci(this.amount);
     }
 
     setupInnerCanvas() {
@@ -764,8 +878,8 @@ class Upgrade {
             }
         }
         this.bought = true;
+        boughtUpgrades.push(this);
         this.hideUpgrade();
-        upgrades.push(this);
         findCps();
     }
 
