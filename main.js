@@ -6,6 +6,7 @@ let growthRate = 1.15;
 let clickMultiplier = 1;
 let cpsClicks = 0.00;
 let cpc = 0;
+let lifetimeChips = 0;
 let buildings = {};
 let totalBuildings = 0;
 let cps = 0;
@@ -95,7 +96,7 @@ window.onload = function() {
         return res + formatNums[sciExp];
     }
     plrl = function(num, string) {
-        if (num === 1)
+        if (Math.floor(num) === 1)
             return string;
         if (string.substr(string.length - 1) === "y")
             return string.substr(0, string.length - 1) + "ies"
@@ -312,23 +313,27 @@ window.onload = function() {
                     [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
                     [true, fontpx * 50 + "px 'Open Sans'", "$" + formatSci(u.cost), 'gold'],
                     [false, fontpx * 40 + "px 'Open Sans'", "[Upgrade]", 'lightgray'],
+                    ["<hr>"],
                     [false,fontpx * 36 + "px 'Open Sans'", u.info, 'navajowhite'],
-                    [false, fontpx * 36 + "px 'Open Sans'", '“' + u.description + '”', 'gray']
+                    [false, fontpx * 36 + "px 'Open Sans'", '“' + u.description + '”', '#a5a49f']
                 ];
             } else if (u instanceof Building) {
                 ttStrings = [
                     [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
                     [true, fontpx * 50 + "px 'Open Sans'", "$" + formatSci(u.currentCost), 'gold'],
                     [false, fontpx * 40 + "px 'Open Sans'", "[Owned: " + formatSci(u.amount) + "]", 'lightgray'],
+                    ["<hr>"],
                     [false, fontpx * 40 + "px 'Open Sans'", u.description, 'navajowhite'],
+                    ["<hr>"],
                     [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + formatSci(u.production) + plrl(u.production, " cookie") + "</> per second.", '#a5a49f'],
                     [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount) + plrl(u.production * u.amount, " cookie") + "</> per second.", '#a5a49f'],
-                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (cps !== 0 ? (((u.production*u.amount)/cps)*100).toFixed(0) : cps) + "% of cps]", '#f1f1f1']
+                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (cps !== 0 ? (((u.production*u.amount)/cps)*100).toFixed(0) : cps) + "% of CpS]", '#f1f1f1']
                 ];
             } else if (u === "prestige") {
                 ttStrings = [
-                    [false, fontpx * 36 + "px 'Open Sans'", "Ascending now would grant you<#f1f1f1" + (checkPrestige()[0] < 1 ? " no prestige</>." : formatSci(checkPrestige()[0]) + " prestige levels</> (+" + formatSci(checkPrestige()[0]) + "% cps)."), '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "Ascending now would grant you<#f1f1f1 " + (checkPrestige()[0] < 1 ? "no prestige</>." : formatSci(checkPrestige()[0]) + " prestige " + plrl(checkPrestige()[0], "level") + "</> (+" + formatSci(checkPrestige()[0]) + "% CpS)."), '#a5a49f'],
                     [false, fontpx * 36 + "px 'Open Sans'", "You need<#f1f1f1 " + formatSci(checkPrestige()[1]) + "</> more cookies for the next level.", '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "Multiplier:<#f1f1f1 " + multiplier + "%</>", '#a5a49f'],
                 ];
 
             }
@@ -339,6 +344,10 @@ window.onload = function() {
 
 
             for (let i = 0; i < ttStrings.length; i++) {
+                if (ttStrings[i].length === 1) {
+                    boxHeight += marg;
+                    continue;
+                }
                 tooltipMeasure(ttStrings[i]);
                 if (ttStrings[i][0] === false) {
                     boxHeight += ttStrings[i][4] + marg;
@@ -381,6 +390,24 @@ window.onload = function() {
 
 
             for (let i = 0; i < ttStrings.length; i++) {
+                if (ttStrings[i].length === 1) {
+                    if (ttStrings[i][0] === "<hr>") {
+                        let gr = ttctx.createLinearGradient(x + marg, totalHeight + marg, x + w - marg, totalHeight + marg);
+
+                        gr.addColorStop(0, 'saddlebrown');
+                        gr.addColorStop(.2, 'darkgray');
+                        gr.addColorStop(.8, 'darkgray');
+                        gr.addColorStop(1, 'saddlebrown');
+
+                        ttctx.strokeStyle = gr;
+                        ttctx.beginPath();
+                        ttctx.moveTo(x + marg, totalHeight + marg);
+                        ttctx.lineTo(x + w - marg, totalHeight + marg);
+                        ttctx.stroke();
+                    }
+                    totalHeight += marg;
+                    continue;
+                }
                 if (ttStrings[i][0] === false)
                     totalHeight += ttStrings[i][4] + marg;
                 ttctx.fillStyle = ttStrings[i][3];
@@ -580,8 +607,19 @@ window.onload = function() {
     }
 
     function prestige() {
-        let prestigePoints = checkPrestige();
-        console.log(prestigePoints);
+        let prestigePoints = checkPrestige()[0];
+        if (prestigePoints < 1)
+            return;
+        Object.values(buildings).forEach((b) => {
+            b.presReset();
+        });
+        upgrades.forEach((u) => {
+            u.presReset();
+        })
+        resetVariables();
+
+        lifetimeChips += prestigePoints;
+        multiplier += lifetimeChips * 0.01;
     }
 
     function checkPrestige() {
@@ -593,6 +631,18 @@ window.onload = function() {
         return [chips, nextChipWorth - lifetimeCookies];
     }
 
+    function resetVariables() {
+        totalCookies = 0;
+        runCookies = 0;
+        growthRate = 1.15;
+        clickMultiplier = 1;
+        cpsClicks = 0.00;
+        cpc = 0;
+        totalBuildings = 0;
+        cps = 0;
+        multiplier = 1;
+        boughtUpgrades = [];
+    }
 
     window.onresize = onWindowResize;
     document.addEventListener('click', onDocumentClick);
@@ -717,6 +767,18 @@ class Building {
         this.ownedButton.innerText = formatSci(this.amount);
     }
 
+    presReset() {
+        this.amount = 0;
+        this.multiplier = 1;
+        if (!(this.name === "Cursor")) {
+            this.hidden = true;
+            this.hideBuilding();
+            this.deactivateBuilding();
+        }
+        this.drawInnerCanvas();
+        this.determineCost();
+    }
+
     setupInnerCanvas() {
         if (this.name === "Cursor")
             return;
@@ -805,13 +867,13 @@ class Upgrade {
             case 'cursor': {
                 this.cost = buildings['cursor'].baseCost * 10 *
                     (growthRate ** this.requiredBuildings) / growthRate;
-                this.info = "The mouse and cursors are twice as efficient."
+                this.info = "The mouse and cursors are<#f1f1f1 twice</> as efficient."
                 break;
             }
             case 'mouse': {
                 this.cost = 5000 *
                     (growthRate ** this.requiredBuildings) / growthRate;
-                this.info = "Clicking gains +1% of your cps."
+                this.info = "Clicking gains<#f1f1f1 +1%</> of your CpS."
                 break;
             }
             case 'fingers': {
@@ -822,13 +884,13 @@ class Upgrade {
             }
             case 'cookie': {
                 this.cost = 100 * (growthRate ** this.tier) / growthRate;
-                this.info = "Cookie Production Multiplier +1%."
+                this.info = "Cookie Production Multiplier<#f1f1f1 +1%</>."
                 break;
             }
             default: {
                 this.cost = buildings[this.type].baseCost * 10 *
                     (growthRate ** this.requiredBuildings) / growthRate;
-                this.info = this.type.charAt(0).toUpperCase() + this.type.slice(1) + "s are twice as efficient."
+                this.info = this.type.charAt(0).toUpperCase() + this.type.slice(1) + "s are<#f1f1f1 twice</> as efficient."
             }
         }
     }
@@ -870,6 +932,7 @@ class Upgrade {
                 break;
             }
             case "cookie": {
+                multiplier += 0.01;
                 break;
             }
             default: {
@@ -883,7 +946,7 @@ class Upgrade {
         findCps();
     }
 
-    checkAvailable() {
+    checkAvailable(pres = false) {
         if (this.bought)
             return;
         let prevBought = this.tier === 1;
@@ -893,12 +956,12 @@ class Upgrade {
 
         switch (this.type) {
             case "mouse": {
-                if (prevBought)
+                if (!pres && prevBought)
                     this.unhideUpgrade();
                 break;
             }
             case "fingers": {
-                if (prevBought)
+                if (!pres && prevBought)
                     this.unhideUpgrade();
                 break;
             }
@@ -915,6 +978,11 @@ class Upgrade {
                     this.unhideUpgrade();
             }
         }
+    }
+
+    presReset() {
+        this.bought = false;
+        this.checkAvailable(true);
     }
 
     activateUpgrade() {
