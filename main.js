@@ -1,40 +1,56 @@
 // Global variables
-let totalCookies = 0;
-let runCookies = 0;
-let lifetimeCookies = 0;
+let totalPops = 0;
+let runPops = 0;
+let lifetimePops = 0;
 let growthRate = 1.15;
+let lifetimeTruePops = 0;
+let droplets = 0;
+let reqDroplets = 1;
+let dMult = 1;
+let dps = 0;
+let multiplier = 1;
+let tickSpeed = 10;
+// Click variables
 let clickMultiplier = 1;
-let cpsClicks = 0.00;
+let dpsClicks = 0.00;
 let cpc = 0;
-let lifetimeChips = 0;
+// Building variables
 let buildings = {};
 let totalBuildings = 0;
-let cps = 0;
-let multiplier = 1;
+// Upgrade variables
 let upgrades = [];
 let boughtUpgrades = [];
-let findCps;
+let upgradeColors = {};
+
+let popsPerClick = 1;
+
+// Function declarations
+let findDps;
 let formatSci;
 let plrl;
+// Other
 let images = {};
-let upgradeColors = {};
 let formatNums = [' million',' billion',' trillion',' quadrillion',' quintillion',' sextillion',' septillion',' octillion',' nonillion'];
-let tickSpeed = 10;
 
-function addCookies(num) {
-    totalCookies += num;
-    runCookies += num;
-    lifetimeCookies += num;
+// JS Console functions
+function addPops(num) {
+    totalPops += num;
+    runPops += num;
+    lifetimePops += num;
 }
 
+// Run on window load
 window.onload = function() {
-    // Semi-global variables
-    let bigCookieClickable = document.getElementById("clickable-div-bigCookie");
+    // Elements
+    let bigPopsicleClickable = document.getElementById("clickable-div-bigPopsicle");
+    let bucketClickable = document.getElementById("clickable-div-bucket");
     let newsDiv = document.getElementById("newsDiv");
+    // Semi-global variables
     let newsTimer = 10000;
+    let cursorClickTimer = 0;
+    let cursorClickMax = 0;
     let currTooltip;
-
-    // Number formatting setup (thanks cookie clicker)
+    // Number formatting setup (thanks pop clicker)
     let prefixes=['','un','duo','tre','quattuor','quin','sex','septen','octo','novem'];
     let suffixes=['decillion','vigintillion','trigintillion','quadragintillion','quinquagintillion','sexagintillion','septuagintillion','octogintillion','nonagintillion'];
     for (let i in suffixes)
@@ -49,8 +65,7 @@ window.onload = function() {
     let canvas;
     let ctx;
     let rect;
-    let textLabelsSize;
-    let anSmallCookies = [{'timeLeft': 0, 'maxTime': 0, 'image': 'smallcookie.png', 'size': [0, 0, 0, 0]}];
+    let anDroplets = [{'timeLeft': 0, 'maxTime': 0, 'image': 'droplet.png', 'size': [0, 0, 0, 0]}];
     let anBigClick = 0;
     let anBigHover = false;
 
@@ -66,17 +81,24 @@ window.onload = function() {
     document.getElementById("prestigeButton").addEventListener("mouseout", function() { currTooltip = null; })
 
     // Global function setup
-    findCps = function() {
+    findDps = function() {
         let r = 0;
         for (let b in buildings) {
+            if (buildings[b].name === "Cursor") {
+                cursorClickMax = 1000 / (buildings[b].amount * 1);
+                cursorClickTimer = 0;
+                droplets = Math.floor(droplets);
+            }
             buildings[b].determineCost();
             r += buildings[b].production * buildings[b].amount;
         }
-        cps = r * multiplier;
+        dps = r * multiplier;
     }
     formatSci = function(num, decDigits = 0) {
+        if (decDigits === 0)
+            num = Math.floor(num);
         if (num < 1)
-            return Number(num.toFixed(1)).toLocaleString();
+            return Number(num.toFixed(decDigits)).toLocaleString();
         if (num < 1000000)
             return Number(num.toFixed(decDigits)).toLocaleString();
         num = Number(num);
@@ -103,6 +125,9 @@ window.onload = function() {
         return string + "s";
     }
 
+    // Load images
+    loadImages(() => {});
+
     // Buildings Setup
     buildingsData.forEach(function(el) {
         buildings[el['name'].toLowerCase()] = new Building(el['baseCost'], el['baseProduction'], el['name'], el['description']);
@@ -117,24 +142,26 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        totalCookies += cps / (tickSpeed * 10);
-        runCookies += cps / (tickSpeed * 10);
-        lifetimeCookies += cps / (tickSpeed * 10);
+        droplets += dps / (tickSpeed * 10);
+
+        if (droplets > reqDroplets * dMult)
+            droplets = reqDroplets * dMult;
         newsTimer += tickSpeed;
+        cursorClickTimer += tickSpeed;
 
 
         for (let b in buildings) {
             buildings[b].deactivateBuilding();
-            if (buildings[b].hidden === true && totalCookies >= buildings[b].baseCost / 2) {
+            if (buildings[b].hidden === true && totalPops >= buildings[b].baseCost / 2) {
                 buildings[b].unhideBuilding();
             }
-            if (totalCookies >= buildings[b].currentCost) {
+            if (totalPops >= buildings[b].currentCost) {
                 buildings[b].activateBuilding();
             }
         }
         upgrades.forEach(e => {
             e.deactivateUpgrade();
-            if (totalCookies >= e.cost) {
+            if (totalPops >= e.cost) {
                 e.activateUpgrade();
             }
             e.checkAvailable();
@@ -144,8 +171,13 @@ window.onload = function() {
             newsTimer = 0;
             generateNews();
         }
+
+        if (cursorClickMax > 0 && cursorClickTimer >= cursorClickMax) {
+            cursorClickTimer = 0;
+            onBigPopsicleClick(0, 0, true);
+        }
         // Drawing function
-        cookieCanvas();
+        popCanvas();
     }, tickSpeed)}
 
     function onWindowResize() {
@@ -158,7 +190,7 @@ window.onload = function() {
 
 
     function setupCanvas() {
-        canvas = document.getElementById("cookieCanvas");
+        canvas = document.getElementById("popCanvas");
         ctx  = canvas.getContext("2d");
         rect = canvas.getBoundingClientRect();
         // Make it visually fill the positioned parent
@@ -168,18 +200,6 @@ window.onload = function() {
         canvas.width  = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
 
-        // Text Labels Setup
-        ctx.font = "40px 'Kavoon'"
-        let totalCookiesString = formatSci(totalCookies) + plrl(totalCookies, " cookie");
-        let thmTCS = ctx.measureText(totalCookiesString);
-
-        ctx.font = "26px 'Kavoon'"
-        let cpsString = "per second: " + formatSci(cps, 1);
-        let thmCPS = ctx.measureText(cpsString);
-
-        // Get height of text for spacing
-        textLabelsSize = thmTCS.actualBoundingBoxAscent + thmTCS.actualBoundingBoxDescent +
-            thmCPS.actualBoundingBoxAscent + thmCPS.actualBoundingBoxDescent;
         // Tooltip canvas
         ttcanvas = document.getElementById("tooltipCanvas");
         ttctx = ttcanvas.getContext("2d");
@@ -195,52 +215,82 @@ window.onload = function() {
         ttctx.scale(scale, scale);
     }
 
-    // Runs when big cookie is clicked
-    function onBigCookieClick(clientX, clientY) {
-        cpc = clickMultiplier + (cps * cpsClicks);
-        totalCookies += cpc;
-        runCookies += cpc;
-        lifetimeCookies += cpc;
+    // Runs when big popsicle is clicked
+    function onBigPopsicleClick(clientX, clientY, fake=false) {
+        cpc = clickMultiplier + (dps * dpsClicks);
+        let x;
+        let y;
+        if (!fake) {
+            x = clientX;
+            y = clientY;
+            x += getRandomInt(-1 * window.innerWidth * 0.01, window.innerWidth * 0.01);
+            y += getRandomInt(-1 * window.innerWidth * 0.01, window.innerWidth * 0.01);
+        }
         let time = 1000;
-        let x = clientX;
-        let y = clientY;
-        x += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
-        y += getRandomInt(-1 * window.innerWidth * 0.005, window.innerWidth * 0.005);
-        anSmallCookies.push({'timeLeft': time, 'maxTime': time, 'image': 'smallcookie.png', 'size': drawSmallCookie(x, y)})
+        if (droplets < reqDroplets * dMult)
+            anDroplets.push({'timeLeft': time, 'maxTime': time, 'image': 'droplet.png', 'size': drawDroplet(x, y)})
+        if (!fake)
+            droplets += cpc;
     }
 
-    function cookieCanvas() {
+    // Runs when bucket is clicked
+    function onBucketClick(clientX, clientY) {
+        if (droplets >= reqDroplets) {
+            droplets -= reqDroplets;
+            totalPops += popsPerClick;
+            runPops += popsPerClick;
+            lifetimePops += popsPerClick;
+            reqDroplets++;
+        }
+    }
+
+    function popCanvas() {
         let fontpx = window.innerWidth / 3750;
 
         // Clear Canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ttctx.clearRect(0, 0, ttcanvas.width, ttcanvas.height);
-        // Cookies Text
+        // Popsicles Text
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
 
+        let totalTextHeight = 0;
+        let tMarg = canvas.height * 0.05;
+
         ctx.font = fontpx * 60 + "px 'Kavoon'"
-        let totalCookiesString;
-        totalCookiesString = formatSci(totalCookies) + plrl(totalCookies, " cookie");
+        ctx.fillStyle = "#ff457d";
+        let totalPopsString;
+        totalPopsString = formatSci(totalPops) + plrl(totalPops, " popsicle");
+        totalTextHeight += quickMeasureHeight(totalPopsString, ctx) + tMarg;
+        ctx.fillText(totalPopsString, canvas.width / 2, totalTextHeight);
 
-        ctx.fillText(totalCookiesString, canvas.width / 2, rect.top + canvas.height * 0.01);
+        ctx.fillStyle = "#87cefa";
+        ctx.font = fontpx * 60 + "px 'Kavoon'"
+        let totalDropsString;
+        totalDropsString = formatSci(droplets) + plrl(droplets, " droplet");
+        totalTextHeight += quickMeasureHeight(totalDropsString, ctx) + tMarg;
 
+        ctx.fillText(totalDropsString, canvas.width / 2, totalTextHeight);
+
+        ctx.fillStyle = "white";
         ctx.font = fontpx * 50 + "px 'Kavoon'"
-        let cpsString = (cps < 10 && cps !== 0) ?
-            "per second: " + formatSci(cps, 1)
-            : "per second: " + formatSci(cps);
-        ctx.fillText(cpsString, canvas.width / 2, rect.top + canvas.height * 0.01 + textLabelsSize * 1.25);
+        let dpsString = (dps < 10 && dps !== 0) ?
+            "per second: " + formatSci(dps, 2)
+            : "per second: " + formatSci(dps);
+        totalTextHeight += quickMeasureHeight(dpsString, ctx) + tMarg;
+        ctx.fillText(dpsString, canvas.width / 2, totalTextHeight);
 
-        // Big Cookie
-        let img = images["cookie.png"];
+        // Big Popsicle
+        let img = images["pop-1.png"];
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-        scale /= 1.45;
+        scale /= 2;
 
         let yOffset = 0;
 
         if(anBigHover) {
-            scale *= 1.04;
-            yOffset -= scale * 30;
+            scale *= droplets < reqDroplets ? 1.1 : 1.05;
+            // Centers on click (disabled)
+            // yOffset -= scale * 30;
         }
 
         // Click animation
@@ -252,31 +302,52 @@ window.onload = function() {
                 scaleMinus = rangeConvert(-1000, -1, -1000, 0, scale / 10);
             anBigClick -= 100;
             scale -= scaleMinus;
+            // Centers on click (disabled)
             yOffset += scaleMinus * 900;
         }
         let width = img.width * scale;
         let height = img.height * scale;
 
-        let bcMargin = (canvas.height * 0.08) + yOffset;
+        let bcMargin = yOffset;
 
         let x = (canvas.width / 2) - (width / 2);
-        let y = textLabelsSize + rect.top + bcMargin;
+        let y = totalTextHeight + tMarg / 2 + bcMargin;
         ctx.drawImage(img, x, y, width, height);
 
-        let clickableDivBigCookie = document.getElementById("clickable-div-bigCookie");
-        clickableDivBigCookie.style.height = height.toString() + "px";
-        clickableDivBigCookie.style.width = width.toString() + "px";
-        // Centering
-        clickableDivBigCookie.style.marginLeft = ((canvas.width - (x + width))).toString() + "px";
-        clickableDivBigCookie.style.marginRight = ((canvas.width - (x + width))).toString() + "px";
-        clickableDivBigCookie.style.marginTop = (rect.top + textLabelsSize + bcMargin).toString() + "px";
-        clickableDivBigCookie.style.marginBottom = (canvas.height - (height + rect.top + textLabelsSize + bcMargin)).toString() + "px";
+        // Clickable div
+        bigPopsicleClickable.style.height = height.toString() + "px";
+        bigPopsicleClickable.style.width = width.toString() + "px";
+        bigPopsicleClickable.style.marginLeft = ((canvas.width - (x + width))).toString() + "px";
+        bigPopsicleClickable.style.marginRight = ((canvas.width - (x + width))).toString() + "px";
+        bigPopsicleClickable.style.marginTop = (totalTextHeight + bcMargin).toString() + "px";
 
-        // Small cookies
-        let c = anSmallCookies.length - 1;
+        // Bucket
+        let gimg = droplets >= reqDroplets ? images["bucket1-full.png"] : images["bucket1-empty.png"];
+        let gscale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        gscale /= droplets >= reqDroplets ? 0.745 : 1.25;
+        let gwidth = gimg.width * gscale;
+        let gheight = gimg.height * gscale;
+        let gx = (canvas.width / 2) - (gwidth / 2);
+        let gy = canvas.height - gheight / 2;
+        ctx.drawImage(gimg, gx, gy, gwidth, gheight);
 
-        while(anSmallCookies[c] && c > 0) {
-            let el = anSmallCookies[Math.abs(c - anSmallCookies.length)];
+        ctx.fillStyle = "black";
+        ctx.font = fontpx * 50 + "px 'Kavoon'"
+        let droText = formatSci(droplets) + "/" + formatSci(reqDroplets);
+        ctx.fillText(droText, (canvas.width / 2) - (quickMeasureWidth(droText, ctx) / 2), canvas.height - quickMeasureHeight(droText, ctx) - tMarg*0.5);
+
+        // Clickable div
+        bucketClickable.style.height = gheight.toString() + "px";
+        bucketClickable.style.width = gwidth.toString() + "px";
+        bucketClickable.style.marginLeft = gx.toString() + "px";
+        bucketClickable.style.marginRight = gx.toString() + "px";
+        bucketClickable.style.marginTop = gy.toString() + "px";
+
+        // Droplets
+        let c = anDroplets.length - 1;
+
+        while(anDroplets[c] && c > 0) {
+            let el = anDroplets[Math.abs(c - anDroplets.length)];
             let timeLeft = el['timeLeft'];
 
             el['timeLeft'] = timeLeft - tickSpeed;
@@ -285,6 +356,7 @@ window.onload = function() {
             let y = el['size'][1];
             let w = el['size'][2];
             let h = el['size'][3];
+            el['size'][1] += 2;
 
             ctx.globalAlpha = rangeConvert(timeLeft, el['maxTime'], 0, 1, 0);
             ctx.drawImage(image, x, y, w, h);
@@ -300,9 +372,11 @@ window.onload = function() {
             ctx.globalAlpha = 1;
 
             if (timeLeft <= 0)
-                anSmallCookies.splice(Math.abs(c - anSmallCookies.length), 1);
+                anDroplets.splice(Math.abs(c - anDroplets.length), 1);
             c--;
         }
+
+
         // Tooltip
         if (currTooltip) {
             let u = currTooltip['upgrade']
@@ -325,14 +399,14 @@ window.onload = function() {
                     ["<hr>"],
                     [false, fontpx * 40 + "px 'Open Sans'", u.description, 'navajowhite'],
                     ["<hr>"],
-                    [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + formatSci(u.production) + plrl(u.production, " cookie") + "</> per second.", '#a5a49f'],
-                    [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount) + plrl(u.production * u.amount, " cookie") + "</> per second.", '#a5a49f'],
-                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (cps !== 0 ? (((u.production*u.amount)/cps)*100).toFixed(0) : cps) + "% of CpS]", '#f1f1f1']
+                    [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + (u.amount === 0 ? formatSci(u.baseProduction) : formatSci(u.production)) + plrl(u.production, " droplet") + "</> per second.", '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount) + plrl(u.production * u.amount, " droplet") + "</> per second.", '#a5a49f'],
+                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (dps !== 0 ? (((u.production*u.amount)/dps)*100).toFixed(0) : dps) + "% of DpS]", '#f1f1f1']
                 ];
             } else if (u === "prestige") {
                 ttStrings = [
-                    [false, fontpx * 36 + "px 'Open Sans'", "Ascending now would grant you<#f1f1f1 " + (checkPrestige()[0] < 1 ? "no prestige</>." : formatSci(checkPrestige()[0]) + " prestige " + plrl(checkPrestige()[0], "level") + "</> (+" + formatSci(checkPrestige()[0]) + "% CpS)."), '#a5a49f'],
-                    [false, fontpx * 36 + "px 'Open Sans'", "You need<#f1f1f1 " + formatSci(checkPrestige()[1]) + "</> more cookies for the next level.", '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "Ascending now would grant you<#f1f1f1 " + (checkPrestige()[0] < 1 ? "no prestige</>." : formatSci(checkPrestige()[0]) + " prestige " + plrl(checkPrestige()[0], "level") + "</> (+" + formatSci(checkPrestige()[0]) + "% dps)."), '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "You need<#f1f1f1 " + formatSci(checkPrestige()[1]) + "</> more popsicles for the next level.", '#a5a49f'],
                     [false, fontpx * 36 + "px 'Open Sans'", "Multiplier:<#f1f1f1 " + multiplier + "%</>", '#a5a49f'],
                 ];
 
@@ -439,19 +513,18 @@ window.onload = function() {
                     else
                         ttctx.fillText(ttStrings[i][2], x + marg, totalHeight);
                 else {
-                    // console.log(textPieces);
                     let offset = 0;
                     if (ttStrings[i][0] === true) {
                         for (let j = 0; j < textPieces.length; j++) {
                             ttctx.fillStyle = textPieces[j][1];
                             ttctx.fillText(textPieces[j][0], x + w - ttStrings[i][5] - marg + offset, totalHeight);
-                            offset += quickMeasureWidth(textPieces[j][0]);
+                            offset += quickMeasureWidth(textPieces[j][0], ttctx);
                         }
                     } else {
                         for (let j = 0; j < textPieces.length; j++) {
                             ttctx.fillStyle = textPieces[j][1];
                             ttctx.fillText(textPieces[j][0], x + marg + offset, totalHeight);
-                            offset += quickMeasureWidth(textPieces[j][0]);
+                            offset += quickMeasureWidth(textPieces[j][0], ttctx);
                         }
                     }
                 }
@@ -482,9 +555,13 @@ window.onload = function() {
         i.push(height, width);
     }
 
-    function quickMeasureWidth(text) {
-        let sizeMeasure = ttctx.measureText(text);
+    function quickMeasureWidth(text, context) {
+        let sizeMeasure = context.measureText(text);
         return sizeMeasure.actualBoundingBoxRight;
+    }
+    function quickMeasureHeight(text, context) {
+        let sizeMeasure = context.measureText(text);
+        return sizeMeasure.actualBoundingBoxAscent;
     }
 
     function getIndicesOf(searchStr, str, caseSensitive) {
@@ -511,8 +588,13 @@ window.onload = function() {
         return ((((oldValue - oldMin) * newRange) / oldRange) + newMin)
     }
 
-    function drawSmallCookie(x, y) {
-        let img = images["smallcookie.png"];
+    function drawDroplet(x, y) {
+        if (!x || !y) {
+            let bpcRect = bigPopsicleClickable.getBoundingClientRect();
+            x = getRandomInt(bpcRect.left, bpcRect.left + bigPopsicleClickable.offsetWidth);
+            y = getRandomInt(bpcRect.top, bpcRect.top + bigPopsicleClickable.offsetHeight);
+        }
+        let img = images["droplet.png"];
 
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
         scale /= 15;
@@ -523,16 +605,19 @@ window.onload = function() {
     }
 
     function onDocumentClick(event) {
-        if (event.target === bigCookieClickable) {
-            onBigCookieClick(event.clientX, event.clientY);
+        if (event.target === bigPopsicleClickable) {
+            onBigPopsicleClick(event.clientX, event.clientY);
+        }
+        else if (event.target === bucketClickable) {
+            onBucketClick(event.clientX, event.clientY);
         }
     }
 
     function onDocumentHover(event) {
         let target = event.target;
-        anBigHover = target === bigCookieClickable;
+        anBigHover = target === bigPopsicleClickable;
         if (!target.classList.contains("buyBuilding") && !target.classList.contains("upgradeButton")) {
-            for (let depth = 0; depth < 2; depth++) {
+            for (let depth = 0; depth < 3; depth++) {
                 if (!target.parentElement)
                     break;
                 target = target.parentElement;
@@ -565,12 +650,12 @@ window.onload = function() {
     }
 
     function onDocumentMouseDown(event) {
-        if (event.target === bigCookieClickable) {
+        if (event.target === bigPopsicleClickable) {
             anBigClick = -1;
         }
     }
     function onDocumentMouseUp(event) {
-        if (event.target === bigCookieClickable) {
+        if (event.target === bigPopsicleClickable) {
             anBigClick = 1;
         }
     }
@@ -618,28 +703,28 @@ window.onload = function() {
         })
         resetVariables();
 
-        lifetimeChips += prestigePoints;
-        multiplier += lifetimeChips * 0.01;
+        lifetimeTruePops += prestigePoints;
+        multiplier += lifetimeTruePops * 0.01;
     }
 
     function checkPrestige() {
-        let chips = Math.cbrt(lifetimeCookies / (10 ** 12));
-        // How many cookies chips are worth
-        let chipsWorth = Math.ceil((chips ** 3) * (10 ** 12));
-        let nextChipWorth = (Math.floor(chips + 1) ** 3) * (10 ** 12);
+        let truePops = Math.cbrt(lifetimePops / (10 ** 12));
+        // How many pops [true popsicles] are worth
+        let truePopsWorth = Math.ceil((truePops ** 3) * (10 ** 12));
+        let nextTruePopWorth = (Math.floor(truePops + 1) ** 3) * (10 ** 12);
 
-        return [chips, nextChipWorth - lifetimeCookies];
+        return [truePops, nextTruePopWorth - lifetimePops];
     }
 
     function resetVariables() {
-        totalCookies = 0;
-        runCookies = 0;
+        totalPops = 0;
+        runPops = 0;
         growthRate = 1.15;
         clickMultiplier = 1;
-        cpsClicks = 0.00;
+        dpsClicks = 0.00;
         cpc = 0;
         totalBuildings = 0;
-        cps = 0;
+        dps = 0;
         multiplier = 1;
         boughtUpgrades = [];
     }
@@ -651,13 +736,13 @@ window.onload = function() {
     document.addEventListener('mouseover', onDocumentHover);
     document.addEventListener('mouseout', onDocumentMouseLeave);
     document.addEventListener('mousemove', onDocumentHover);
-    loadImages(gameLoop);
     sortedUpgrades.forEach((e) => e.makeHtml());
     document.getElementById("cover").classList.remove('hidden');
     setupCanvas();
-    cookieCanvas();
+    popCanvas();
     setupCanvas();
     Object.values(buildings).forEach((e) => e.setupInnerCanvas());
+    gameLoop();
 }
 
 class Building {
@@ -723,6 +808,11 @@ class Building {
         this.priceButton.id = "price" + this.name;
         this.namePriceRows.appendChild(this.priceButton);
 
+        let img = images['smallPop-1.png'].cloneNode(false);
+        img.style.height = "25px";
+        img.style.width = "auto";
+        this.priceButton.appendChild(img);
+
         this.ownedButton = document.createElement("span");
         this.ownedButton.classList.add("ownedBuilding");
         this.ownedButton.id = "owned" + this.name;
@@ -739,8 +829,8 @@ class Building {
     buyBuilding() {
         let currentCost = this.currentCost;
         let amount = this.amount;
-        if (totalCookies >= currentCost) {
-            totalCookies -= currentCost;
+        if (totalPops >= currentCost) {
+            totalPops -= currentCost;
             amount++;
             totalBuildings++;
         }
@@ -749,7 +839,7 @@ class Building {
         upgrades.forEach(e => {
             e.checkAvailable();
         })
-        findCps();
+        findDps();
         if (Object.keys(images).length > 0 && this.canvas) {
             this.drawInnerCanvas();
         }
@@ -758,12 +848,14 @@ class Building {
     determineCost() {
         this.currentCost = Number((this.baseCost * (growthRate ** this.amount)).toFixed()); // Formula for determining cost
         if (this.name === "Cursor") {
-            this.production = (clickMultiplier + (cps * cpsClicks)) / 10;
+            this.production = clickMultiplier + (dps * dpsClicks);
         } else {
             // Formula for determining production
-            this.production = (this.baseProduction) * this.multiplier;
+            this.production = this.baseProduction * this.amount * this.multiplier;
         }
-        this.priceButton.innerText = "$ " + formatSci(this.currentCost);
+
+        this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">")+2) + formatSci(this.currentCost);
+
         this.ownedButton.innerText = formatSci(this.amount);
     }
 
@@ -857,46 +949,42 @@ class Upgrade {
         if(this.tier === 1)
             this.requiredBuildings = 1;
         else if(this.tier === 2)
-            this.requiredBuildings = 10;
+            this.requiredBuildings = 5;
         else if(this.tier === 3)
+            this.requiredBuildings = 10;
+        else if(this.tier === 4)
             this.requiredBuildings = 25;
         else
             this.requiredBuildings = 50 * (this.tier - 3);
 
         switch (this.type){
-            case 'cursor': {
-                this.cost = buildings['cursor'].baseCost * 10 *
+            case "cursor": {
+                this.cost = buildings[this.type].baseCost * 5 *
                     (growthRate ** this.requiredBuildings) / growthRate;
                 this.info = "The mouse and cursors are<#f1f1f1 twice</> as efficient."
                 break;
             }
-            case 'mouse': {
-                this.cost = 5000 *
-                    (growthRate ** this.requiredBuildings) / growthRate;
-                this.info = "Clicking gains<#f1f1f1 +1%</> of your CpS."
+            case "stick": {
+                this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
+                this.info = "Bucket clicks produce <#f1f1f1 twice</> as many popsicles.";
                 break;
             }
-            case 'fingers': {
-                break;
-            }
-            case 'specialGrandmas': {
-                break;
-            }
-            case 'cookie': {
-                this.cost = 100 * (growthRate ** this.tier) / growthRate;
-                this.info = "Cookie Production Multiplier<#f1f1f1 +1%</>."
+            case "bucket": {
+                this.cost = 5 * (growthRate ** (this.tier * 10)) / growthRate;
+                this.info = "Maximum droplets<#f1f1f1 doubled</>.";
                 break;
             }
             default: {
-                this.cost = buildings[this.type].baseCost * 10 *
+                this.cost = buildings[this.type].baseCost * 5 *
                     (growthRate ** this.requiredBuildings) / growthRate;
                 this.info = this.type.charAt(0).toUpperCase() + this.type.slice(1) + "s are<#f1f1f1 twice</> as efficient."
             }
         }
+        this.cost = Math.floor(this.cost);
     }
 
     makeHtml() {
-        let upgrade = images['smallcookie.png'].cloneNode(false);
+        let upgrade = images['upgrade.png'].cloneNode(false);
         let upgradeRows = document.getElementById("upgradeRows");
         upgrade.classList.add("upgradeButton");
         upgrade.id = "upgrade" + this.uid;
@@ -905,6 +993,7 @@ class Upgrade {
         }
 
         upgrade.style.backgroundColor = "#" + upgradeColors[this.type];
+
         upgrade.onclick = () => this.buyUpgrade();
         this.htmlTag = upgrade;
         upgradeRows.append(upgrade);
@@ -913,26 +1002,20 @@ class Upgrade {
     }
 
     buyUpgrade() {
-        if (this.bought || totalCookies < this.cost)
+        if (this.bought || totalPops < this.cost)
             return;
-        totalCookies -= this.cost;
+        totalPops -= this.cost;
         switch (this.type) {
             case "cursor": {
                 clickMultiplier *= 2;
                 break;
             }
-            case "mouse": {
-                cpsClicks += 0.01;
+            case "stick": {
+                popsPerClick *= 2;
                 break;
             }
-            case "fingers": {
-                break;
-            }
-            case "specialGrandmas": {
-                break;
-            }
-            case "cookie": {
-                multiplier += 0.01;
+            case "bucket": {
+                dMult *= 2;
                 break;
             }
             default: {
@@ -943,7 +1026,7 @@ class Upgrade {
         this.bought = true;
         boughtUpgrades.push(this);
         this.hideUpgrade();
-        findCps();
+        findDps();
     }
 
     checkAvailable(pres = false) {
@@ -955,21 +1038,9 @@ class Upgrade {
                 prevBought = true;}});
 
         switch (this.type) {
-            case "mouse": {
-                if (!pres && prevBought)
-                    this.unhideUpgrade();
-                break;
-            }
-            case "fingers": {
-                if (!pres && prevBought)
-                    this.unhideUpgrade();
-                break;
-            }
-            case "specialGrandmas": {
-                break;
-            }
-            case "cookie": {
-                if (this.tier === 1 || totalCookies >= this.cost / 5)
+            case "bucket":
+            case "stick": {
+                if (prevBought)
                     this.unhideUpgrade();
                 break;
             }

@@ -24,20 +24,31 @@ html, body {
 
 /* Left Area */
 #leftArea {
-    background-color: #00468b;
-    padding: 2vw;
+    background-color: #434539;
+    padding: 0;
     position: relative;
     text-align: center;
     flex: 1;
-    border-right: 0.75vw #4c2e1a solid;
+    border-right: 0.75vw #5c8844 solid;
 }
 
-#clickable-div-bigCookie {
+#clickable-div-bigPopsicle {
     position: absolute;
     background-color: rgba(0, 0, 0, 0);
     cursor: pointer;
     border-radius: 50%;
     padding: 0;
+
+    /*border: 3px dotted white;*/
+}
+
+#clickable-div-bucket {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+    border-radius: 30%;
+    padding: 0;
+    color: blue;
 
     /*border: 3px dotted white;*/
 }
@@ -52,10 +63,10 @@ html, body {
 #upperCenter {
     height: 10vh;
     min-height: 75px;
-    background-color: darkcyan;
+    background-color: #bc70dd;
     display: flex;
     flex-direction: row;
-    border-bottom: 0.75vw #4c2e1a solid;
+    border-bottom: 0.75vw #5c8844 solid;
 }
 
 .upColDiv {
@@ -94,7 +105,7 @@ html, body {
     font-weight: 800;
     font-style: italic;
     color: gray;
-    background-color: #f4a460;
+    background-color: #eabc95;
     cursor: pointer;
     outline: none;
 }
@@ -110,8 +121,7 @@ html, body {
 
 #tooltipCanvasDiv {
     height: 100%;
-    max-height: 100vh;
-    width: 48%;
+    width: 49.5%;
     position: fixed;
     bottom: 0;
     pointer-events: none;
@@ -130,14 +140,14 @@ html, body {
     height: 20vh;
     max-height: 20vh;
     background-color: indianred;
-    border-bottom: 0.75vw #4c2e1a solid;
+    border-bottom: 0.75vw #5c8844 solid;
 }
 
 /* Right Area */
 
 #rightArea {
     background-color: #46008b;
-    border-left: 0.75vw #4c2e1a solid;
+    border-left: 0.75vw #5c8844 solid;
     overflow: auto;
     flex: 1;
 }
@@ -182,7 +192,7 @@ html, body {
     object-fit: cover;
     cursor: pointer;
     max-width: 100%;
-    height: auto;
+    max-height: 100%;
     border: 1px brown solid;
     background-color: mistyrose;
 }
@@ -205,7 +215,7 @@ html, body {
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.8);
     text-align: left;
-    height: 11vh;
+    height: 70px;
 
     cursor: pointer;
     display: flex;
@@ -229,15 +239,20 @@ html, body {
 
 .buyBuildingLabel {
     font: 2vw 'Open Sans', sans-serif;
+    color: #458843;
     font-style: italic;
-    color: darkslategray;
     padding-left: 1vw;
 }
 
 .buyBuildingCost {
-    font: 1.5vw 'Ubuntu', sans-serif;
+    display: flex;
+    flex-direction: row;
+    font: 22px 'Open Sans', sans-serif;
+    color: #ff457d;
     font-weight: 700;
     padding-left: 1vw;
+    vertical-align: center;
+    line-height: 100%;
 }
 
 .namePriceRows {
@@ -253,7 +268,7 @@ html, body {
     align-items: center;
     font: 2.5vw 'Open Sans', sans-serif;
     font-style: italic;
-    color: darkslategray;
+    color: #43887a;
 }
 
 
