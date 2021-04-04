@@ -67,6 +67,24 @@ const upgradeData = [
         "description": "So cool..."
     },
     {
+        "name": "Wheels",
+        "type": "ice cream van",
+        "tier": 1,
+        "description": "Why didn't we have those before, exactly?"
+    },
+    {
+        "name": "New Paint Job",
+        "type": "ice cream van",
+        "tier": 2,
+        "description": "Sure to scare fewer parents away!"
+    },
+    {
+        "name": "Printed Name",
+        "type": "ice cream van",
+        "tier": 3,
+        "description": "PopsiCool!"
+    },
+    {
         "name": "Cardboard Sticks",
         "type": "stick",
         "tier": 1,
