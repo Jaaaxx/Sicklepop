@@ -90,7 +90,7 @@ window.onload = function() {
                 droplets = Math.floor(droplets);
             }
             buildings[b].determineCost();
-            r += buildings[b].production;
+            r += buildings[b].production * buildings[b].amount * buildings[b].multiplier;
         }
         dps = r * multiplier;
     }
@@ -851,7 +851,7 @@ class Building {
             this.production = clickMultiplier + (dps * dpsClicks);
         } else {
             // Formula for determining production
-            this.production = this.baseProduction * this.amount * this.multiplier;
+            this.production = this.baseProduction;
         }
 
         this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">")+2) + formatSci(this.currentCost);
