@@ -183,7 +183,7 @@ html, body {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     grid-gap: 5px;
-    background-color: #2196F3;
+    background-color: #69bfff;
     padding: 10px;
     margin-top: 0;
 }
@@ -206,16 +206,17 @@ html, body {
 }
 
 #buyRows {
-    background-color: #2196F3;
+    background-color: #69bfff;
     padding: 10px;
     margin-top: 10px;
 }
 
 .buyBuilding {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgb(148, 200, 125);
     border: 1px solid rgba(0, 0, 0, 0.8);
     text-align: left;
     height: 70px;
+    min-height: 10vh;
 
     cursor: pointer;
     display: flex;
@@ -230,11 +231,11 @@ html, body {
 }
 
 .buyBuilding:hover:not(.disabled) {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(148, 200, 125, 0.5);
 }
 
 .buyBuilding:active:not(.disabled) {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(148, 200, 125, 0.3);
 }
 
 .buyBuildingLabel {

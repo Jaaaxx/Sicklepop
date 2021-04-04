@@ -294,7 +294,7 @@ window.onload = function() {
         }
 
         // Click animation
-        if (anBigClick <= -1) {
+        if (anBigClick <= -1 && droplets < reqDroplets) {
             let scaleMinus;
             if (anBigClick >= -1000)
                 scaleMinus = rangeConvert(anBigClick, -1, -1000, 0, scale / 10);
@@ -323,8 +323,8 @@ window.onload = function() {
 
         // Bucket
         let gimg = droplets >= reqDroplets ? images["bucket1-full.png"] : images["bucket1-empty.png"];
-        let gscale = Math.min(canvas.width / img.width, canvas.height / img.height);
-        gscale /= droplets >= reqDroplets ? 0.745 : 1.25;
+        let gscale = Math.min(canvas.width / gimg.width, canvas.height / gimg.height);
+        gscale /= 1.25;
         let gwidth = gimg.width * gscale;
         let gheight = gimg.height * gscale;
         let gx = (canvas.width / 2) - (gwidth / 2);
