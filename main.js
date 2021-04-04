@@ -90,7 +90,7 @@ window.onload = function() {
                 droplets = Math.floor(droplets);
             }
             buildings[b].determineCost();
-            r += buildings[b].production * buildings[b].amount;
+            r += buildings[b].production * buildings[b].amount * buildings[b].multiplier;
         }
         dps = r * multiplier;
     }
@@ -399,8 +399,8 @@ window.onload = function() {
                     ["<hr>"],
                     [false, fontpx * 40 + "px 'Open Sans'", u.description, 'navajowhite'],
                     ["<hr>"],
-                    [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + (u.amount === 0 ? formatSci(u.baseProduction) : formatSci(u.production)) + plrl(u.production, " droplet") + "</> per second.", '#a5a49f'],
-                    [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount) + plrl(u.production * u.amount, " droplet") + "</> per second.", '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + (u.amount === 0 ? formatSci(u.baseProduction * u.multiplier) : formatSci(u.production * u.multiplier)) + plrl(u.production * u.multiplier, " droplet") + "</> per second.", '#a5a49f'],
+                    [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount * u.multiplier) + plrl(u.production * u.amount * u.multiplier, " droplet") + "</> per second.", '#a5a49f'],
                     [true, fontpx * 36 + "px 'Open Sans'", "[" + (dps !== 0 ? (((u.production*u.amount)/dps)*100).toFixed(0) : dps) + "% of DpS]", '#f1f1f1']
                 ];
             } else if (u === "prestige") {
@@ -851,7 +851,7 @@ class Building {
             this.production = clickMultiplier + (dps * dpsClicks);
         } else {
             // Formula for determining production
-            this.production = this.baseProduction * this.multiplier;
+            this.production = this.baseProduction;
         }
 
         this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">")+2) + formatSci(this.currentCost);
