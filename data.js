@@ -63,7 +63,16 @@ const upgradeData = [
 
 const newsData = [
     "Who wants a popsicle?",
-    "You feel like making popsicles. But nobody wants to lick your popsicles."
+    "You feel like making popsicles. But nobody wants to lick your popsicles.",
+    "You feel like licking popsicles.",
+    "Daddy loves you!",
+    "Lick it all up!",
+    "It's sticky!",
+    "It's getting all over my clothes.",
+    "So creamy!",
+    "The juice is getting everywhere.",
+    "Hey kids, who wants to lick my popsicle?",
+    "Come touch my popsicles!"
 ]
 
 const buildingsData = [

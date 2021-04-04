@@ -90,7 +90,7 @@ window.onload = function() {
                 droplets = Math.floor(droplets);
             }
             buildings[b].determineCost();
-            r += buildings[b].production * buildings[b].amount;
+            r += buildings[b].production;
         }
         dps = r * multiplier;
     }
