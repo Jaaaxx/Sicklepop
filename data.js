@@ -6,7 +6,6 @@ const imageData = [
     "bucket1-full.png",
     "upgrade.png",
     "dad.png",
-    "factory.png",
     "goldenPop.png",
     "popsicle stand.png",
     "ice cream van.png"
