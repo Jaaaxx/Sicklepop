@@ -7,7 +7,9 @@ const imageData = [
     "upgrade.png",
     "dad.png",
     "factory.png",
-    "goldenPop.png"
+    "goldenPop.png",
+    "popsicle stand.png",
+    "ice cream van.png"
 ]
 
 const upgradeData = [
@@ -36,6 +38,36 @@ const upgradeData = [
         "description": "Looks like papa got a new fridge!"
     },
     {
+        "name": "Samsung® Smart Apron",
+        "type": "dad",
+        "tier": 2,
+        "description": "Kiss the cook!"
+    },
+    {
+        "name": "Samsung® Smart Beer",
+        "type": "dad",
+        "tier": 3,
+        "description": "I could quit whenever I want!"
+    },
+    {
+        "name": "Tip Jar",
+        "type": "popsicle stand",
+        "tier": 1,
+        "description": "It's a tip jar... for tips."
+    },
+    {
+        "name": "Hand-drawn Sign",
+        "type": "popsicle stand",
+        "tier": 2,
+        "description": "Made with crayons... and love"
+    },
+    {
+        "name": "Refined Cooler",
+        "type": "popsicle stand",
+        "tier": 3,
+        "description": "So cool..."
+    },
+    {
         "name": "Cardboard Sticks",
         "type": "stick",
         "tier": 1,
@@ -54,10 +86,22 @@ const upgradeData = [
         "description": "Plastic popsicle sticks (Warning: not liable for environmental damage)"
     },
     {
-        "name": "Bigger Bucket",
+        "name": "Big Bucket",
         "type": "bucket",
         "tier": 1,
         "description": "More space in the bucket, more droplets to be held!"
+    },
+    {
+        "name": "Bigger Bucket",
+        "type": "bucket",
+        "tier": 2,
+        "description": "Even more space in the bucket, even more droplets to be held!"
+    },
+    {
+        "name": "Biggest Bucket",
+        "type": "bucket",
+        "tier": 3,
+        "description": "The most space in the bucket, the most droplets to be held!"
     }
 ]
 
@@ -89,9 +133,15 @@ const buildingsData = [
         "description": "Who wants a popsicle, kids?"
     },
     {
-        "name": "Factory",
+        "name": "Popsicle Stand",
         "baseCost": 125,
         "baseProduction": 25,
-        "description": "Mass produces popsicles."
+        "description": "When life gives you droplets... sell popsicles."
+    },
+    {
+        "name": "Ice Cream Van",
+        "baseCost": 625,
+        "baseProduction": 125,
+        "description": "It is okay to accept candy from this one."
     }
 ]
