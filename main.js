@@ -401,7 +401,7 @@ window.onload = function() {
                     ["<hr>"],
                     [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + (u.amount === 0 ? formatSci(u.baseProduction * u.multiplier) : formatSci(u.production * u.multiplier)) + plrl(u.production * u.multiplier, " droplet") + "</> per second.", '#a5a49f'],
                     [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount * u.multiplier) + plrl(u.production * u.amount * u.multiplier, " droplet") + "</> per second.", '#a5a49f'],
-                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (dps !== 0 ? (((u.production*u.amount)/dps)*100).toFixed(0) : dps) + "% of DpS]", '#f1f1f1']
+                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (dps !== 0 ? (((u.production*u.amount*u.multiplier)/dps)*100).toFixed(0) : dps) + "% of DpS]", '#f1f1f1']
                 ];
             } else if (u === "prestige") {
                 ttStrings = [
