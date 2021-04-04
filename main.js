@@ -1019,7 +1019,7 @@ class Upgrade {
                 break;
             }
             default: {
-                buildings[this.type].multiplier += 1;
+                buildings[this.type].multiplier *= 1;
                 break;
             }
         }
