@@ -21,6 +21,8 @@ let totalBuildings = 0;
 let upgrades = [];
 let boughtUpgrades = [];
 let upgradeColors = {};
+let bonusDroplets = 10;
+let bdCounter = 0;
 
 let popsPerClick = 1;
 
@@ -144,8 +146,16 @@ window.onload = function() {
     function gameLoop() {setInterval(function() {
         droplets += dps / (tickSpeed * 10);
 
-        if (droplets > reqDroplets * dMult)
+        if (bdCounter >= bonusDroplets) {
+            bdCounter = 0;
+            droplets += 1;
+            flashBackground("#d2b1b1", 1000)
+        }
+
+        if (droplets > reqDroplets * dMult) {
             droplets = reqDroplets * dMult;
+        }
+
         newsTimer += tickSpeed;
         cursorClickTimer += tickSpeed;
 
@@ -702,6 +712,13 @@ window.onload = function() {
         while (news === newsLabel.innerText)
             news = newsData[Math.floor(Math.random() * newsData.length)];
         newsLabel.innerText = news;
+    }
+
+    function flashBackground(color, time) {
+        let leftArea = document.getElementById("leftArea");
+        let bg = leftArea.style.backgroundColor;
+        leftArea.style.backgroundColor = color;
+        setTimeout(() => leftArea.style.backgroundColor = bg, time);
     }
 
     function loadImages(callback) {
