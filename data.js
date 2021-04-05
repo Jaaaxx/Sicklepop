@@ -164,7 +164,7 @@ const buildingsData = [
         "name": "Cursor",
         "baseCost": 5,
         "baseProduction": 1,
-        "description": "Autolicks once every 1 seconds."
+        "description": "Autolicks once every second."
     },
     {
         "name": "Dad",

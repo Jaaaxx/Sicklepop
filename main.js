@@ -22,8 +22,8 @@ let totalBuildings = 0;
 let upgrades = [];
 let boughtUpgrades = [];
 let upgradeColors = {};
-let bonusDroplets = -10;
-let bucketHover = false;
+let bonusDroplets = 0;
+let bonusDropletsInterval = -1;
 let popsPerClick = 1;
 
 // Function declarations
@@ -33,6 +33,7 @@ let plrl;
 // Other
 let images = {};
 let formatNums = [' million',' billion',' trillion',' quadrillion',' quintillion',' sextillion',' septillion',' octillion',' nonillion'];
+let bucketHover = false;
 
 // JS Console functions
 function addPops(num) {
@@ -155,7 +156,7 @@ window.onload = function() {
         newsTimer += tickSpeed;
         cursorClickTimer += tickSpeed;
 
-        if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDroplets === 0) {
+        if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDropletsInterval === 0) {
             totalPops += 1;
             lifetimePops += 1;
             droplets += 1;
@@ -1045,12 +1046,7 @@ class Upgrade {
             }
             case "collector": {
                 this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
-                let tNum;
-                if (this.tier === 1)
-                    tNum = 20;
-                else
-                    tNum = 20 / (1.1 * (this.tier - 1));
-                this.info = "Generates a free popsicle every <#f1f1f1 " + Math.round(tNum * 100) / 100 + "</> droplets.";
+                this.info = "Generates<#f1f1f1 " + Math.pow(2, this.tier - 1) + "</> free " + plrl(Math.pow(2, this.tier - 1), "popsicle") + " every <#f1f1f1 " + Math.max(1, 20 - Math.floor((this.tier - 1) / 2)) + "</> droplets.";
                 break;
             }
             default: {
@@ -1098,10 +1094,8 @@ class Upgrade {
                 break;
             }
             case "collector": {
-                if (this.tier === 1)
-                    bonusDroplets = 20;
-                else
-                    bonusDroplets = 20 / (1.1 * (this.tier - 1));
+                bonusDroplets = Math.pow(2, this.tier - 1);
+                bonusDropletsInterval = Math.max(1, 20 - Math.floor((this.tier - 1) / 2));
                 break;
             }
             default: {
