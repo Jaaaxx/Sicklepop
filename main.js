@@ -499,7 +499,7 @@ window.onload = function() {
                     flaImg = images["icon-dad.png"].cloneNode(false);
                 else if (u instanceof Building && u.name === "Cursor" || u instanceof Upgrade && u.type === "cursor")
                     flaImg = images["icon-cursor.png"].cloneNode(false);
-                ttctx.drawImage(flaImg, x + marg, y + marg / 2, flaSize, flaSize);
+                ttctx.drawImage(flaImg, x + marg, y + marg, flaSize, flaSize);
             }
             for (let i = 0; i < ttStrings.length; i++) {
                 let offset = 0;
