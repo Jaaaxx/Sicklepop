@@ -298,7 +298,7 @@ window.onload = function() {
         ctx.fillText(dpsString, canvas.width / 2, totalTextHeight);
 
         // Big Popsicle
-        let img = images["pop-1.png"];
+        let img = images["pop-1.png"].cloneNode(false);
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
         scale /= 2;
 
@@ -339,9 +339,9 @@ window.onload = function() {
         bigPopsicleClickable.style.marginTop = (totalTextHeight + bcMargin).toString() + "px";
 
         // Bucket
-        let gimg = droplets >= reqDroplets ? images["bucket1-full.png"] : images["bucket1-empty.png"];
+        let gimg = droplets >= reqDroplets ? images["bucket1-full.png"].cloneNode(false) : images["bucket1-empty.png"].cloneNode(false);
         if (bucketHover)
-            gimg = droplets >= reqDroplets ? images["bucket1-hover.png"] : images["bucket1-empty-hover.png"];
+            gimg = droplets >= reqDroplets ? images["bucket1-hover.png"].cloneNode(false) : images["bucket1-empty-hover.png"].cloneNode(false);
         let gscale = Math.min(canvas.width / gimg.width, canvas.height / gimg.height);
         gscale /= 1.25;
         let gwidth = gimg.width * gscale;
@@ -370,7 +370,7 @@ window.onload = function() {
             let timeLeft = el['timeLeft'];
 
             el['timeLeft'] = timeLeft - tickSpeed;
-            let image = images[el['image']];
+            let image = images[el['image']].cloneNode(false);
             let x = el['size'][0];
             let y = el['size'][1];
             let w = el['size'][2];
@@ -494,11 +494,11 @@ window.onload = function() {
             ttctx.fillRect(x, y, w, boxHeight)
 
             if (u instanceof Upgrade || u instanceof Building) {
-                let flaImg = images["upgrade.png"];
-                if (u instanceof  Building && u.name === "Dad")
-                    flaImg = images["icon-dad.png"];
-                else if (u instanceof  Building && u.name === "Cursor")
-                    flaImg = images["icon-cursor.png"];
+                let flaImg = images["upgrade.png"].cloneNode(false);
+                if (u instanceof Building && u.name === "Dad" || u instanceof Upgrade && u.type === "dad")
+                    flaImg = images["icon-dad.png"].cloneNode(false);
+                else if (u instanceof Building && u.name === "Cursor" || u instanceof Upgrade && u.type === "cursor")
+                    flaImg = images["icon-cursor.png"].cloneNode(false);
                 ttctx.drawImage(flaImg, x + marg, y + marg / 2, flaSize, flaSize);
             }
             for (let i = 0; i < ttStrings.length; i++) {
@@ -525,7 +525,7 @@ window.onload = function() {
                     } else if (ttStrings[i][2].includes("$")) {
                     ttStrings[i][2] = ttStrings[i][2].replace("$", "");
 
-                    let tImg = images["smallPop-1.png"];
+                    let tImg = images["smallPop-1.png"].cloneNode(false);
 
                     let tSize = window.innerHeight * 0.04;
 
@@ -648,7 +648,7 @@ window.onload = function() {
             x = getRandomInt(bpcRect.left, bpcRect.left + bigPopsicleClickable.offsetWidth);
             y = getRandomInt(bpcRect.top, bpcRect.top + bigPopsicleClickable.offsetHeight);
         }
-        let img = images["droplet.png"];
+        let img = images["droplet.png"].cloneNode(false);
 
         let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
         scale /= 15;
@@ -870,9 +870,9 @@ class Building {
 
         let icon = images['upgrade.png'].cloneNode(false);
         if (this.name === "Dad")
-            icon = images['icon-dad.png'];
+            icon = images['icon-dad.png'].cloneNode(false);
         else if (this.name === "Cursor")
-            icon = images['icon-cursor.png'];
+            icon = images['icon-cursor.png'].cloneNode(false);
         icon.classList.add("buildingIcon");
         this.buyButton.appendChild(icon);
 
@@ -961,7 +961,7 @@ class Building {
             return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        let img = images[this.name.toLowerCase() + ".png"];
+        let img = images[this.name.toLowerCase() + ".png"].cloneNode(false);
 
         let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
         scale /= 1;
@@ -1068,6 +1068,12 @@ class Upgrade {
 
     makeHtml() {
         let upgrade = images['upgrade.png'].cloneNode(false);
+        if (this.type === "cursor") {
+            upgrade = images['icon-cursor.png'].cloneNode(false);
+        } else if (this.type === "dad") {
+            upgrade = images['icon-dad.png'].cloneNode(false);
+        }
+
         let upgradeRows = document.getElementById("upgradeRows");
         upgrade.classList.add("upgradeButton");
         upgrade.id = "upgrade" + this.uid;
