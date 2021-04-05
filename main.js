@@ -311,7 +311,7 @@ window.onload = function() {
         }
 
         // Click animation
-        if (anBigClick <= -1 && droplets < reqDroplets) {
+        if (anBigClick <= -1 && droplets < reqDroplets * dMult) {
             let scaleMinus;
             if (anBigClick >= -1000)
                 scaleMinus = rangeConvert(anBigClick, -1, -1000, 0, scale / 10);
@@ -865,6 +865,8 @@ class Building {
         this.buyButton.appendChild(this.namePriceRows);
 
         let icon = images['upgrade.png'].cloneNode(false);
+        if (this.name === "Dad")
+            icon = images['icon-dad.png'];
         icon.classList.add("buildingIcon");
         this.buyButton.appendChild(icon);
 
