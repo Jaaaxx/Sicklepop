@@ -495,6 +495,10 @@ window.onload = function() {
 
             if (u instanceof Upgrade || u instanceof Building) {
                 let flaImg = images["upgrade.png"];
+                if (u instanceof  Building && u.name === "Dad")
+                    flaImg = images["icon-dad.png"];
+                else if (u instanceof  Building && u.name === "Cursor")
+                    flaImg = images["icon-cursor.png"];
                 ttctx.drawImage(flaImg, x + marg, y + marg / 2, flaSize, flaSize);
             }
             for (let i = 0; i < ttStrings.length; i++) {
@@ -867,6 +871,8 @@ class Building {
         let icon = images['upgrade.png'].cloneNode(false);
         if (this.name === "Dad")
             icon = images['icon-dad.png'];
+        else if (this.name === "Cursor")
+            icon = images['icon-cursor.png'];
         icon.classList.add("buildingIcon");
         this.buyButton.appendChild(icon);
 
