@@ -432,12 +432,12 @@ window.onload = function() {
 
                 tooltipMeasure(ttStrings[i]);
 
-                if (i === 0 || i === 2 && (u instanceof Upgrade || u instanceof Building))
+                if (i <= 2 && (u instanceof Upgrade || u instanceof Building))
                     xOff += flaSize;
                 if (ttStrings[i][0] === true)
-                    xOff += ttStrings[i-1][5] - marg * 2;
+                    xOff += ttStrings[i-1][5];
                 if (ttStrings[i][2].includes("$"))
-                    xOff += window.innerHeight * 0.04;
+                    xOff += window.innerHeight * 0.04 + marg * 2;
                 if (ttStrings[i][0] === false)
                     boxHeight += ttStrings[i][4] + marg;
 
