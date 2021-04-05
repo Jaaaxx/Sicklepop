@@ -4,6 +4,8 @@ const imageData = [
     "droplet.png",
     "bucket1-empty.png",
     "bucket1-full.png",
+    "bucket1-hover.png",
+    "bucket1-empty-hover.png",
     "upgrade.png",
     "dad.png",
     "popsicle stand.png",
@@ -118,6 +120,24 @@ const upgradeData = [
         "type": "bucket",
         "tier": 3,
         "description": "The most space in the bucket, the most droplets to be held!"
+    },
+    {
+        "name": "Droplet Collectors",
+        "type": "collector",
+        "tier": 1,
+        "description": "Little ants pick up bonus popsicles for you!"
+    },
+    {
+        "name": "Fire Ants",
+        "type": "collector",
+        "tier": 2,
+        "description": "Probably shouldn't eat those."
+    },
+    {
+        "name": "Wasps",
+        "type": "collector",
+        "tier": 3,
+        "description": "Okay. Do NOT eat the wasp popsicles."
     }
 ]
 
@@ -132,7 +152,11 @@ const newsData = [
     "So creamy!",
     "The juice is getting everywhere.",
     "Hey kids, who wants to lick my popsicle?",
-    "Come touch my popsicles!"
+    "Come touch my popsicles!",
+    "Lick every last drop!",
+    "Juicy!",
+    "\"It's so big!\" (The Popsicle)",
+    "Suck out all the juices!"
 ]
 
 const buildingsData = [

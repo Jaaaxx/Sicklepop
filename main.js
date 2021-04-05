@@ -6,6 +6,7 @@ let growthRate = 1.15;
 let lifetimeTruePops = 0;
 let droplets = 0;
 let reqDroplets = 1;
+let lifetimeDroplets = 0;
 let dMult = 1;
 let dps = 0;
 let multiplier = 1;
@@ -21,9 +22,8 @@ let totalBuildings = 0;
 let upgrades = [];
 let boughtUpgrades = [];
 let upgradeColors = {};
-let bonusDroplets = 10;
-let bdCounter = 0;
-
+let bonusDroplets = -10;
+let bucketHover = false;
 let popsPerClick = 1;
 
 // Function declarations
@@ -145,19 +145,23 @@ window.onload = function() {
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
         droplets += dps / (tickSpeed * 10);
-
-        if (bdCounter >= bonusDroplets) {
-            bdCounter = 0;
-            droplets += 1;
-            flashBackground("#d2b1b1", 1000)
-        }
+        lifetimeDroplets += dps / (tickSpeed * 10);
 
         if (droplets > reqDroplets * dMult) {
             droplets = reqDroplets * dMult;
+            lifetimeDroplets -= dps / (tickSpeed * 10);
         }
 
         newsTimer += tickSpeed;
         cursorClickTimer += tickSpeed;
+
+        if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDroplets === 0) {
+            totalPops += 1;
+            lifetimePops += 1;
+            droplets += 1;
+            lifetimeDroplets += 1;
+            flashBackground("#5a4a57", 100)
+        }
 
 
         for (let b in buildings) {
@@ -239,8 +243,10 @@ window.onload = function() {
         let time = 1000;
         if (droplets < reqDroplets * dMult)
             anDroplets.push({'timeLeft': time, 'maxTime': time, 'image': 'droplet.png', 'size': drawDroplet(x, y)})
-        if (!fake)
+        if (!fake && droplets < reqDroplets * dMult) {
             droplets += cpc;
+            lifetimeDroplets += cpc;
+        }
     }
 
     // Runs when bucket is clicked
@@ -333,6 +339,8 @@ window.onload = function() {
 
         // Bucket
         let gimg = droplets >= reqDroplets ? images["bucket1-full.png"] : images["bucket1-empty.png"];
+        if (bucketHover)
+            gimg = droplets >= reqDroplets ? images["bucket1-hover.png"] : images["bucket1-empty-hover.png"];
         let gscale = Math.min(canvas.width / gimg.width, canvas.height / gimg.height);
         gscale /= 1.25;
         let gwidth = gimg.width * gscale;
@@ -486,7 +494,7 @@ window.onload = function() {
 
             if (u instanceof Upgrade || u instanceof Building) {
                 let flaImg = images["upgrade.png"];
-                ttctx.drawImage(flaImg, x + marg, y + marg, flaSize, flaSize);
+                ttctx.drawImage(flaImg, x + marg, y + marg / 2, flaSize, flaSize);
             }
             for (let i = 0; i < ttStrings.length; i++) {
                 let offset = 0;
@@ -777,6 +785,14 @@ window.onload = function() {
         boughtUpgrades = [];
     }
 
+    function onBucketHover() {
+        bucketHover = true;
+    }
+
+    function onBucketOut() {
+        bucketHover = false;
+    }
+
     window.onresize = onWindowResize;
     document.addEventListener('click', onDocumentClick);
     document.addEventListener('mousedown', onDocumentMouseDown);
@@ -784,6 +800,8 @@ window.onload = function() {
     document.addEventListener('mouseover', onDocumentHover);
     document.addEventListener('mouseout', onDocumentMouseLeave);
     document.addEventListener('mousemove', onDocumentHover);
+    bucketClickable.addEventListener('mousedown', onBucketHover)
+    bucketClickable.addEventListener('mouseup', onBucketOut)
     sortedUpgrades.forEach((e) => e.makeHtml());
     document.getElementById("cover").classList.remove('hidden');
     setupCanvas();
@@ -1025,6 +1043,16 @@ class Upgrade {
                 this.info = "Maximum droplets<#f1f1f1 doubled</>.";
                 break;
             }
+            case "collector": {
+                this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
+                let tNum;
+                if (this.tier === 1)
+                    tNum = 20;
+                else
+                    tNum = 20 / (1.1 * (this.tier - 1));
+                this.info = "Generates a free popsicle every <#f1f1f1 " + Math.round(tNum * 100) / 100 + "</> droplets.";
+                break;
+            }
             default: {
                 this.cost = buildings[this.type].baseCost * 5 *
                     (growthRate ** this.requiredBuildings) / growthRate;
@@ -1069,6 +1097,13 @@ class Upgrade {
                 dMult *= 2;
                 break;
             }
+            case "collector": {
+                if (this.tier === 1)
+                    bonusDroplets = 20;
+                else
+                    bonusDroplets = 20 / (1.1 * (this.tier - 1));
+                break;
+            }
             default: {
                 buildings[this.type].multiplier *= 2;
                 break;
@@ -1090,6 +1125,7 @@ class Upgrade {
 
         switch (this.type) {
             case "bucket":
+            case "collector":
             case "stick": {
                 if (prevBought)
                     this.unhideUpgrade();
