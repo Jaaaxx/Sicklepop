@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Kavivanar&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 html, body {
     height: 100%;
@@ -24,7 +25,7 @@ html, body {
 
 /* Left Area */
 #leftArea {
-    background-color: #434539;
+    background-color: #453943;
     padding: 0;
     position: relative;
     text-align: center;
@@ -207,19 +208,21 @@ html, body {
 
 #buyRows {
     background-color: #69bfff;
-    padding: 10px;
-    margin-top: 10px;
+    padding-bottom: 5px;
+    overflow: hidden;
 }
 
 .buyBuilding {
-    background-color: rgb(148, 200, 125);
+    background-color: rgb(155, 176, 190);
     border: 1px solid rgba(0, 0, 0, 0.8);
     text-align: left;
     height: 70px;
     min-height: 10vh;
+    width: 100%;
+
+    position: relative;
 
     cursor: pointer;
-    display: flex;
     flex-direction: row;
     overflow: hidden;
 
@@ -231,11 +234,22 @@ html, body {
 }
 
 .buyBuilding:hover:not(.disabled) {
-    background-color: rgba(148, 200, 125, 0.5);
+    background-color: rgba(155, 176, 190, 0.5);
 }
 
 .buyBuilding:active:not(.disabled) {
-    background-color: rgba(148, 200, 125, 0.3);
+    background-color: rgba(155, 176, 190, 0.3);
+}
+
+.buildingIcon {
+    height: 100%;
+    width: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 50%;
+    z-index: 1;
+
 }
 
 .buyBuildingLabel {
@@ -248,28 +262,37 @@ html, body {
 .buyBuildingCost {
     display: flex;
     flex-direction: row;
-    font: 22px 'Open Sans', sans-serif;
-    color: #ff457d;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+    font-style: italic;
+    color: #C2CC52;
+    -webkit-text-stroke: 2px #585f27;
     font-weight: 700;
     padding-left: 1vw;
     vertical-align: center;
     line-height: 100%;
+    position: relative;
 }
 
 .namePriceRows {
-    flex: 3;
     height: 100%;
     max-height: 100%;
+    position: relative;
+    left: 15%;
+    z-index: 2;
 }
 
 .ownedBuilding {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     font: 2.5vw 'Open Sans', sans-serif;
     font-style: italic;
-    color: #43887a;
+    color: rgb(67, 136, 122);
+    z-index: 1;
+    position: absolute;
+    top: 15%;
+    right: 20px;
 }
 
 

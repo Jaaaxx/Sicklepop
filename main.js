@@ -385,7 +385,7 @@ window.onload = function() {
             if (u instanceof Upgrade) {
                 ttStrings = [
                     [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
-                    [true, fontpx * 50 + "px 'Open Sans'", "$" + formatSci(u.cost), 'gold'],
+                    [true, fontpx * 60 + "px 'Open Sans'", "$" + formatSci(u.cost), '#c2cc52'],
                     [false, fontpx * 40 + "px 'Open Sans'", "[Upgrade]", 'lightgray'],
                     ["<hr>"],
                     [false,fontpx * 36 + "px 'Open Sans'", u.info, 'navajowhite'],
@@ -394,14 +394,14 @@ window.onload = function() {
             } else if (u instanceof Building) {
                 ttStrings = [
                     [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
-                    [true, fontpx * 50 + "px 'Open Sans'", "$" + formatSci(u.currentCost), 'gold'],
+                    [true, fontpx * 60 + "px 'Open Sans'", "$" + formatSci(u.currentCost), '#C2CC52'],
                     [false, fontpx * 40 + "px 'Open Sans'", "[Owned: " + formatSci(u.amount) + "]", 'lightgray'],
                     ["<hr>"],
                     [false, fontpx * 40 + "px 'Open Sans'", u.description, 'navajowhite'],
                     ["<hr>"],
                     [false, fontpx * 36 + "px 'Open Sans'", "Each " + u.name.toLowerCase() + " produces<#f1f1f1 " + (u.amount === 0 ? formatSci(u.baseProduction * u.multiplier) : formatSci(u.production * u.multiplier)) + plrl(u.production * u.multiplier, " droplet") + "</> per second.", '#a5a49f'],
                     [false, fontpx * 36 + "px 'Open Sans'", "<#f1f1f1" + u.amount + " " + plrl(u.amount, u.name.toLowerCase()) + "</> producing<#f1f1f1 " + formatSci(u.production * u.amount * u.multiplier) + plrl(u.production * u.amount * u.multiplier, " droplet") + "</> per second.", '#a5a49f'],
-                    [true, fontpx * 36 + "px 'Open Sans'", "[" + (dps !== 0 ? (((u.production*u.amount*u.multiplier)/dps)*100).toFixed(0) : dps) + "% of DpS]", '#f1f1f1']
+                    [true, fontpx * 36 + "px 'Open Sans'", "[<#fff1f1" + (dps !== 0 ? (((u.production*u.amount*u.multiplier)/dps)*100).toFixed(0) : dps) + "%</> of DpS]", '#f1f1f1']
                 ];
             } else if (u === "prestige") {
                 ttStrings = [
@@ -417,20 +417,32 @@ window.onload = function() {
             let boxWidth = 0;
 
 
+            let tempStyle = ttctx.fillStyle;
+            ttctx.fillStyle = ttStrings[0][1];
+            let flaSize = quickMeasureHeight(ttStrings[0][1], ttctx) * 4.5;
+            ttctx.fillStyle = tempStyle;
+
             for (let i = 0; i < ttStrings.length; i++) {
                 if (ttStrings[i].length === 1) {
                     boxHeight += marg;
                     continue;
                 }
+
+                let xOff = 0;
+
                 tooltipMeasure(ttStrings[i]);
-                if (ttStrings[i][0] === false) {
+
+                if (i === 0 || i === 2 && (u instanceof Upgrade || u instanceof Building))
+                    xOff += flaSize;
+                if (ttStrings[i][0] === true)
+                    xOff += ttStrings[i-1][5] - marg * 2;
+                if (ttStrings[i][2].includes("$"))
+                    xOff += window.innerHeight * 0.04;
+                if (ttStrings[i][0] === false)
                     boxHeight += ttStrings[i][4] + marg;
-                    if (ttStrings[i][5] > boxWidth)
-                        boxWidth = ttStrings[i][5];
-                } else {
-                    if (ttStrings[i][5] + ttStrings[i-1][5] > boxWidth)
-                        boxWidth = ttStrings[i][5] + ttStrings[i-1][5] + marg;
-                }
+
+                if (ttStrings[i][5] + xOff > boxWidth)
+                    boxWidth = ttStrings[i][5] + xOff;
             }
 
             let distance = document.getElementById("upgradeRows").getBoundingClientRect().top;
@@ -459,19 +471,25 @@ window.onload = function() {
             // Tooltip box
             drawBorder(x, y, w, boxHeight, 1)
 
-            ttctx.fillStyle = 'saddlebrown';
+            ttctx.fillStyle = '#43887A';
             ttctx.fillRect(x, y, w, boxHeight)
 
-
+            if (u instanceof Upgrade || u instanceof Building) {
+                let flaImg = images["upgrade.png"];
+                ttctx.drawImage(flaImg, x + marg, y + marg, flaSize, flaSize);
+            }
             for (let i = 0; i < ttStrings.length; i++) {
+                let offset = 0;
+                if ((i === 0 || i === 2) && (u instanceof Upgrade || u instanceof Building))
+                    offset = flaSize + marg;
                 if (ttStrings[i].length === 1) {
                     if (ttStrings[i][0] === "<hr>") {
                         let gr = ttctx.createLinearGradient(x + marg, totalHeight + marg, x + w - marg, totalHeight + marg);
 
-                        gr.addColorStop(0, 'saddlebrown');
-                        gr.addColorStop(.2, 'darkgray');
-                        gr.addColorStop(.8, 'darkgray');
-                        gr.addColorStop(1, 'saddlebrown');
+                        gr.addColorStop(0, '#43887A');
+                        gr.addColorStop(.2, 'cyan');
+                        gr.addColorStop(.8, 'cyan');
+                        gr.addColorStop(1, '#43887A');
 
                         ttctx.strokeStyle = gr;
                         ttctx.beginPath();
@@ -481,6 +499,17 @@ window.onload = function() {
                     }
                     totalHeight += marg;
                     continue;
+                    } else if (ttStrings[i][2].includes("$")) {
+                    ttStrings[i][2] = ttStrings[i][2].replace("$", "");
+
+                    let tImg = images["smallPop-1.png"];
+
+                    let tSize = window.innerHeight * 0.04;
+
+                    let tempStyle = ttctx.fillStyle;
+                    ttctx.fillStyle = ttStrings[i][1];
+                    ttctx.drawImage(tImg, x + w - tSize - ttStrings[i][5] - marg - 5, y + marg - ttStrings[i][4] / 4, tSize, tSize);
+                    ttctx.fillStyle = tempStyle;
                 }
                 if (ttStrings[i][0] === false)
                     totalHeight += ttStrings[i][4] + marg;
@@ -508,12 +537,14 @@ window.onload = function() {
                     textPieces.push([ttStrings[i][2].substr(ind2[ind2.length - 1] + 3), ttStrings[i][3]]);
                 }
                 if (textPieces.length === 0)
-                    if (ttStrings[i][0] === true)
-                        ttctx.fillText(ttStrings[i][2], x + w - ttStrings[i][5] - marg, totalHeight);
+                    if (ttStrings[i][0] === true) {
+                        ttctx.strokeStyle = "#585f27"
+                        ttctx.fillText(ttStrings[i][2], x + w - ttStrings[i][5] - marg + offset, totalHeight);
+                        ttctx.strokeText(ttStrings[i][2], x + w - ttStrings[i][5] - marg + offset, totalHeight);
+                    }
                     else
-                        ttctx.fillText(ttStrings[i][2], x + marg, totalHeight);
+                        ttctx.fillText(ttStrings[i][2], x + marg + offset, totalHeight);
                 else {
-                    let offset = 0;
                     if (ttStrings[i][0] === true) {
                         for (let j = 0; j < textPieces.length; j++) {
                             ttctx.fillStyle = textPieces[j][1];
@@ -797,6 +828,10 @@ class Building {
         this.namePriceRows.classList.add("namePriceRows");
         this.buyButton.appendChild(this.namePriceRows);
 
+        let icon = images['upgrade.png'].cloneNode(false);
+        icon.classList.add("buildingIcon");
+        this.buyButton.appendChild(icon);
+
         this.labelButton = document.createElement("span");
         this.labelButton.classList.add("buyBuildingLabel");
         this.labelButton.innerText = this.name;
@@ -854,8 +889,7 @@ class Building {
             this.production = this.baseProduction;
         }
 
-        this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">")+2) + formatSci(this.currentCost);
-
+        this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">") + 2) + formatSci(this.currentCost);
         this.ownedButton.innerText = formatSci(this.amount);
     }
 
