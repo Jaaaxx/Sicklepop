@@ -1054,7 +1054,7 @@ class Upgrade {
             }
             case "collector": {
                 this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
-                this.info = "Generates<#f1f1f1 " + Math.pow(2, this.tier - 1) + "</> free " + plrl(Math.pow(2, this.tier - 1), "popsicle") + " every <#f1f1f1 " + Math.max(1, 20 - Math.floor((this.tier - 1) / 2)) + "</> droplets.";
+                this.info = "Generates<#f1f1f1 " + Math.pow(2, this.tier - 1) + "</>  free " + plrl(Math.pow(2, this.tier - 1), "popsicle") + " every <#f1f1f1 " + Math.max(1, 20 - Math.floor((this.tier - 1) / 2)) + "</> droplets.";
                 break;
             }
             default: {
