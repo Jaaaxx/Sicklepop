@@ -737,6 +737,9 @@ window.onload = function() {
         while (news === newsLabel.innerText)
             news = newsData[Math.floor(Math.random() * newsData.length)];
         newsLabel.innerText = news;
+        let sf = sounds['page-flip.mp3'].cloneNode(false);
+        sf.volume /= 3;
+        sf.play();
     }
 
     function flashBackground(color, time) {

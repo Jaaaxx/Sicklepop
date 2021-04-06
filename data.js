@@ -20,6 +20,7 @@ const imageData = [
 const soundData = [
     "click.mp3",
     "click2.mp3",
+    "page-flip.mp3",
     "drop.mp3"
 ]
 
