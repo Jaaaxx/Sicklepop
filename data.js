@@ -8,6 +8,8 @@ const imageData = [
     "bucket1-empty-hover.png",
     "upgrade.png",
     "dad.png",
+    "dad-apron.png",
+    "dad-beer.png",
     "popsicle stand.png",
     "ice cream van.png",
     "icon-dad.png",

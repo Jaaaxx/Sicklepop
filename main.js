@@ -988,6 +988,17 @@ class Building {
 
         let img = images[this.name.toLowerCase() + ".png"].cloneNode(false);
 
+        if (this.name === "Dad") {
+            for (const [key, value] of Object.entries(boughtUpgrades)) {
+                if (value.name === "Samsung® Smart Apron") {
+                    img = images['dad-apron.png'].cloneNode(false);
+                }
+                if (value.name === "Samsung® Smart Beer") {
+                    img = images['dad-beer.png'].cloneNode(false);
+                }
+            }
+        }
+
         let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
         scale /= 1;
 
@@ -1137,6 +1148,7 @@ class Upgrade {
             return;
         totalPops -= this.cost;
         sounds['click.mp3'].cloneNode(false).play();
+
         switch (this.type) {
             case "cursor": {
                 clickMultiplier *= 2;
@@ -1162,6 +1174,10 @@ class Upgrade {
         }
         this.bought = true;
         boughtUpgrades.push(this);
+
+        Object.values(buildings).forEach((e) => {
+            e.drawInnerCanvas();
+        });
         this.hideUpgrade();
         findDps();
     }
