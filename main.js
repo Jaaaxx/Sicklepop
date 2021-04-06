@@ -499,6 +499,12 @@ window.onload = function() {
                     flaImg = images["icon-dad.png"].cloneNode(false);
                 else if (u instanceof Building && u.name === "Cursor" || u instanceof Upgrade && u.type === "cursor")
                     flaImg = images["icon-cursor.png"].cloneNode(false);
+                else if (u instanceof Upgrade && u.type === "bucket")
+                    flaImg = images["icon-bucket.png"];
+                else if (u instanceof Upgrade && u.type === "stick")
+                    flaImg = images["icon-stick.png"];
+                else if (u instanceof Upgrade && u.type === "collector")
+                    flaImg = images["icon-collector.png"];
                 ttctx.drawImage(flaImg, x + marg, y + marg, flaSize, flaSize);
             }
             for (let i = 0; i < ttStrings.length; i++) {
@@ -1072,16 +1078,22 @@ class Upgrade {
             upgrade = images['icon-cursor.png'].cloneNode(false);
         } else if (this.type === "dad") {
             upgrade = images['icon-dad.png'].cloneNode(false);
+        } else if (this.type === "bucket") {
+            upgrade = images['icon-bucket.png'].cloneNode(false);
+        } else if (this.type === "stick") {
+            upgrade = images['icon-stick.png'].cloneNode(false);
+        } else if (this.type === "collector") {
+            upgrade = images['icon-collector.png'].cloneNode(false);
         }
 
         let upgradeRows = document.getElementById("upgradeRows");
         upgrade.classList.add("upgradeButton");
         upgrade.id = "upgrade" + this.uid;
-        if (!upgradeColors[this.type]) {
-            upgradeColors[this.type] = Math.floor(Math.random() * 16777215).toString(16);
+        if (!upgradeColors[this.tier]) {
+            upgradeColors[this.tier] = Math.floor(Math.random() * 16777215).toString(16);
         }
 
-        upgrade.style.backgroundColor = "#" + upgradeColors[this.type];
+        upgrade.style.backgroundColor = "#" + upgradeColors[this.tier];
 
         upgrade.onclick = () => this.buyUpgrade();
         this.htmlTag = upgrade;

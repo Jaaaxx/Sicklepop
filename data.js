@@ -11,7 +11,10 @@ const imageData = [
     "popsicle stand.png",
     "ice cream van.png",
     "icon-dad.png",
-    "icon-cursor.png"
+    "icon-cursor.png",
+    "icon-bucket.png",
+    "icon-stick.png",
+    "icon-collector.png"
 ]
 
 const upgradeData = [
