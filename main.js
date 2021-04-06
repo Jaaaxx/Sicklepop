@@ -34,6 +34,7 @@ let plrl;
 let images = {};
 let formatNums = [' million',' billion',' trillion',' quadrillion',' quintillion',' sextillion',' septillion',' octillion',' nonillion'];
 let bucketHover = false;
+let sounds = {};
 
 // JS Console functions
 function addPops(num) {
@@ -63,6 +64,9 @@ window.onload = function() {
             formatNums.push(' '+prefixes[ii]+suffixes[i]);
         }
     }
+
+    for (let i = 0; i < soundData.length; i++)
+        sounds[soundData[i]] = new Audio('audio/' + soundData[i]);
 
     // Canvas Setup
     let canvas;
@@ -247,6 +251,7 @@ window.onload = function() {
         if (!fake && droplets < reqDroplets * dMult) {
             droplets += cpc;
             lifetimeDroplets += cpc;
+            sounds['drop.mp3'].cloneNode(false).play();
         }
     }
 
@@ -918,6 +923,7 @@ class Building {
             totalPops -= currentCost;
             amount++;
             totalBuildings++;
+            sounds['click.mp3'].cloneNode(false).play();
         }
         this.amount = amount;
         this.determineCost();
@@ -1106,6 +1112,7 @@ class Upgrade {
         if (this.bought || totalPops < this.cost)
             return;
         totalPops -= this.cost;
+        sounds['click.mp3'].cloneNode(false).play();
         switch (this.type) {
             case "cursor": {
                 clickMultiplier *= 2;

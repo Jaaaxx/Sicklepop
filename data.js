@@ -17,6 +17,11 @@ const imageData = [
     "icon-collector.png"
 ]
 
+const soundData = [
+    "click.mp3",
+    "drop.mp3"
+]
+
 const upgradeData = [
     {
         "name": "Mediocre Licks",
