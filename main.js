@@ -263,6 +263,7 @@ window.onload = function() {
             runPops += popsPerClick;
             lifetimePops += popsPerClick;
             reqDroplets++;
+            sounds['click2.mp3'].cloneNode(false).play();
         }
     }
 
