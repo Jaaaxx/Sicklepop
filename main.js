@@ -24,6 +24,7 @@ let boughtUpgrades = [];
 let upgradeColors = {};
 let bonusDroplets = 0;
 let bonusDropletsInterval = -1;
+let bdBackgroundInterval = 1;
 let popsPerClick = 1;
 
 // Function declarations
@@ -160,12 +161,20 @@ window.onload = function() {
         newsTimer += tickSpeed;
         cursorClickTimer += tickSpeed;
 
+
+        if (dps > 125 ** bdBackgroundInterval) {
+            bdBackgroundInterval++;
+            document.getElementById("leftArea").style.backgroundColor = bdBackgroundInterval % 2 === 0 ? "#5a4a57" : "#453943";
+        }
+
         if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDropletsInterval === 0) {
+            if (Math.floor(lifetimeDroplets) % (bonusDropletsInterval * bdBackgroundInterval * bdBackgroundInterval === 1 ? 1: 2) === 0)
+                flashBackground((bdBackgroundInterval % 2 === 0 ? "#453943" : "#5a4a57"), 100);
+
             totalPops += 1;
             lifetimePops += 1;
             droplets += 1;
             lifetimeDroplets += 1;
-            flashBackground("#5a4a57", 100)
         }
 
 
@@ -1084,16 +1093,27 @@ class Upgrade {
 
     makeHtml() {
         let upgrade = images['upgrade.png'].cloneNode(false);
-        if (this.type === "cursor") {
-            upgrade = images['icon-cursor.png'].cloneNode(false);
-        } else if (this.type === "dad") {
-            upgrade = images['icon-dad.png'].cloneNode(false);
-        } else if (this.type === "bucket") {
-            upgrade = images['icon-bucket.png'].cloneNode(false);
-        } else if (this.type === "stick") {
-            upgrade = images['icon-stick.png'].cloneNode(false);
-        } else if (this.type === "collector") {
-            upgrade = images['icon-collector.png'].cloneNode(false);
+        switch (this.type) {
+            case ("cursor"): {
+                upgrade = images['icon-cursor.png'].cloneNode(false);
+                break;
+            }
+            case ("dad"): {
+                upgrade = images['icon-dad.png'].cloneNode(false);
+                break;
+            }
+            case ("bucket"): {
+                upgrade = images['icon-bucket.png'].cloneNode(false);
+                break;
+            }
+            case ("stick"): {
+                upgrade = images['icon-stick.png'].cloneNode(false);
+                break;
+            }
+            case ("collector"): {
+                upgrade = images['icon-collector.png'].cloneNode(false);
+                break;
+            }
         }
 
         let upgradeRows = document.getElementById("upgradeRows");
