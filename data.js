@@ -168,8 +168,7 @@ const newsData = [
     "Lick every last drop!",
     "Juicy!",
     "\"It's so big!\" (The Popsicle)",
-    "Suck out all the juices!",
-    "I can lick your popsicle all day!"
+    "Suck out all the juices!"
 ]
 
 const buildingsData = [
