@@ -10,6 +10,7 @@ const imageData = [
     "dad.png",
     "dad-apron.png",
     "dad-beer.png",
+    "dad-beer2.png",
     "popsicle stand.png",
     "ice cream van.png",
     "icon-dad.png",

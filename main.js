@@ -990,6 +990,7 @@ class Building {
             }
             if (u.name === "Samsung® Smart Beer") {
                 this.imgs.push(images['dad-beer.png'].cloneNode(false));
+                this.imgs.push(images['dad-beer2.png'].cloneNode(false));
             }
         }
         for (let i = 0; i < this.cImgs.length; i++) {
