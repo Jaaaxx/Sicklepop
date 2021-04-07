@@ -858,6 +858,8 @@ class Building {
     production;
     multiplier = 1;
     hidden = true;
+    cImgs = [];
+    imgs = [];
 
     constructor(baseCost, baseProduction, name, description) {
         this.baseCost = baseCost;
@@ -981,34 +983,47 @@ class Building {
         this.canvas.height = this.canvas.offsetHeight;
     }
 
+    newUpgrade(u) {
+        if (u.type === "dad") {
+            if (u.name === "Samsung® Smart Apron") {
+                this.imgs.push(images['dad-apron.png'].cloneNode(false));
+            }
+            if (u.name === "Samsung® Smart Beer") {
+                this.imgs.push(images['dad-beer.png'].cloneNode(false));
+            }
+        }
+        for (let i = 0; i < this.cImgs.length; i++) {
+            if (this.cImgs[i] === 0)
+                this.cImgs[i] = Math.floor(Math.random() * this.imgs.length);
+        }
+    }
+
     drawInnerCanvas() {
         if (!this.ctx)
             return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        let img = images[this.name.toLowerCase() + ".png"].cloneNode(false);
-
-        if (this.name === "Dad") {
-            for (const [key, value] of Object.entries(boughtUpgrades)) {
-                if (value.name === "Samsung® Smart Apron") {
-                    img = images['dad-apron.png'].cloneNode(false);
-                }
-                if (value.name === "Samsung® Smart Beer") {
-                    img = images['dad-beer.png'].cloneNode(false);
-                }
-            }
-        }
-
-        let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
-        scale /= 1;
-
-        let width = img.width * scale;
-        let height = img.height * scale;
+        if (this.imgs.length === 0)
+            this.imgs.push(images[this.name.toLowerCase() + ".png"].cloneNode(false));
 
         let x = 0;
         let y = 0;
 
+
         for (let i = 0; i < this.amount; i++) {
+
+            if (i >= this.cImgs.length) {
+                let rNum = Math.floor(Math.random() * this.imgs.length);
+                this.cImgs.push(rNum);
+            }
+
+            let img = this.imgs[this.cImgs[i]];
+            let scale = Math.min(this.canvas.width / img.width, this.canvas.height / img.height);
+            scale /= 1;
+
+            let width = img.width * scale;
+            let height = img.height * scale;
+
             if (x > this.canvas.width)
                 break;
             this.ctx.drawImage(img, x, y, width, height);
@@ -1176,6 +1191,7 @@ class Upgrade {
         boughtUpgrades.push(this);
 
         Object.values(buildings).forEach((e) => {
+            e.newUpgrade(this);
             e.drawInnerCanvas();
         });
         this.hideUpgrade();
