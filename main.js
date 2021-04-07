@@ -171,10 +171,10 @@ window.onload = function() {
             if (Math.floor(lifetimeDroplets) % (bonusDropletsInterval * bdBackgroundInterval * bdBackgroundInterval === 1 ? 1: 2) === 0)
                 flashBackground((bdBackgroundInterval % 2 === 0 ? "#453943" : "#5a4a57"), 100);
 
-            totalPops += 1;
-            lifetimePops += 1;
-            droplets += 1;
-            lifetimeDroplets += 1;
+            totalPops += bonusDroplets;
+            lifetimePops += bonusDroplets;
+            droplets += bonusDroplets;
+            lifetimeDroplets += bonusDroplets;
         }
 
 
@@ -984,7 +984,7 @@ class Building {
     }
 
     newUpgrade(u) {
-        if (u.type === "dad") {
+        if (u.type === this.name.toLowerCase()) {
             if (u.name === "Samsung® Smart Apron") {
                 this.imgs.push(images['dad-apron.png'].cloneNode(false));
             }
