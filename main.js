@@ -798,7 +798,18 @@ window.onload = function() {
         let truePopsWorth = Math.ceil((truePops ** 3) * (10 ** 12));
         let nextTruePopWorth = (Math.floor(truePops + 1) ** 3) * (10 ** 12);
 
+        goldenPop();
         return [truePops, nextTruePopWorth - lifetimePops];
+    }
+
+    function goldenPop() {
+        let img = images['pop-1.png'].cloneNode(false);
+        img.classList.add("goldenPopsicle");
+        document.body.appendChild(img);
+    }
+
+    function clickGoldenPop() {
+
     }
 
     function resetVariables() {

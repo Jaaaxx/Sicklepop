@@ -20,7 +20,7 @@ html, body {
 }
 
 #cover {
-    position: fixed; height: 100%; width: 100%; top:0; left: 0; z-index:9999;
+    position: fixed; height: 100%; width: 100%; top:0; left: 0; z-index: 9;
 }
 
 /* Left Area */
@@ -303,4 +303,13 @@ html, body {
 
 .disabled {
     opacity: 60%;
+}
+
+.goldenPopsicle {
+    height: 200px;
+    width: auto;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    z-index: 10;
 }
