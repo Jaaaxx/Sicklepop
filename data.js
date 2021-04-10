@@ -1,5 +1,6 @@
 const imageData = [
     "pop-1.png",
+    "goldenPop-1.png",
     "smallPop-1.png",
     "droplet.png",
     "bucket1-empty.png",

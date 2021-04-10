@@ -26,16 +26,18 @@ let bonusDroplets = 0;
 let bonusDropletsInterval = -1;
 let bdBackgroundInterval = 1;
 let popsPerClick = 1;
-
 // Function declarations
 let findDps;
 let formatSci;
 let plrl;
+let playSound;
+
 // Other
 let images = {};
 let formatNums = [' million',' billion',' trillion',' quadrillion',' quintillion',' sextillion',' septillion',' octillion',' nonillion'];
 let bucketHover = false;
 let sounds = {};
+let interacted = false;
 
 // JS Console functions
 function addPops(num) {
@@ -133,6 +135,11 @@ window.onload = function() {
         return string + "s";
     }
 
+    playSound = function(name) {
+        if (interacted)
+            sounds[name].cloneNode(false).play();
+    }
+
     // Load images
     loadImages(() => {});
 
@@ -150,6 +157,11 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
+        let spawnChance = Math.floor(Math.random() * 5000);
+
+        if (spawnChance === 0) {
+            spawnGoldenPop();
+        }
         droplets += dps / (tickSpeed * 10);
         lifetimeDroplets += dps / (tickSpeed * 10);
 
@@ -245,6 +257,7 @@ window.onload = function() {
 
     // Runs when big popsicle is clicked
     function onBigPopsicleClick(clientX, clientY, fake=false) {
+        interacted = true;
         cpc = clickMultiplier + (dps * dpsClicks);
         let x;
         let y;
@@ -260,7 +273,7 @@ window.onload = function() {
         if (!fake && droplets < reqDroplets * dMult) {
             droplets += cpc;
             lifetimeDroplets += cpc;
-            sounds['drop.mp3'].cloneNode(false).play();
+            playSound('drop.mp3');
         }
     }
 
@@ -272,7 +285,7 @@ window.onload = function() {
             runPops += popsPerClick;
             lifetimePops += popsPerClick;
             reqDroplets++;
-            sounds['click2.mp3'].cloneNode(false).play();
+            playSound('click2.mp3');
         }
     }
 
@@ -746,9 +759,7 @@ window.onload = function() {
         while (news === newsLabel.innerText)
             news = newsData[Math.floor(Math.random() * newsData.length)];
         newsLabel.innerText = news;
-        let sf = sounds['page-flip.mp3'].cloneNode(false);
-        sf.volume /= 3;
-        sf.play();
+        playSound('page-flip.mp3');
     }
 
     function flashBackground(color, time) {
@@ -797,19 +808,32 @@ window.onload = function() {
         // How many pops [true popsicles] are worth
         let truePopsWorth = Math.ceil((truePops ** 3) * (10 ** 12));
         let nextTruePopWorth = (Math.floor(truePops + 1) ** 3) * (10 ** 12);
-
-        goldenPop();
         return [truePops, nextTruePopWorth - lifetimePops];
     }
 
-    function goldenPop() {
-        let img = images['pop-1.png'].cloneNode(false);
+    function spawnGoldenPop() {
+        let img = images['goldenPop-1.png'].cloneNode(false);
+        let imgDiv = document.createElement("div");
         img.classList.add("goldenPopsicle");
-        document.body.appendChild(img);
+        img.style.height = 15 + "vh";
+        img.style.width = "auto";
+        imgDiv.style.top = Math.floor(Math.random() * 90) + "%";
+        imgDiv.style.left = Math.floor(Math.random() * 90) + "%";
+        imgDiv.classList.add("goldenPopsicleDiv");
+        document.body.appendChild(imgDiv);
+        imgDiv.appendChild(img);
+        imgDiv.addEventListener("click", () => clickGoldenPop(imgDiv, false));
+        setTimeout(() => clickGoldenPop(imgDiv, true), 15000);
     }
 
-    function clickGoldenPop() {
+    function clickGoldenPop(el, fake) {
+        if (fake) {
+            el.remove();
+            return;
+        }
 
+        playSound('click2.mp3');
+        el.remove();
     }
 
     function resetVariables() {
@@ -949,7 +973,7 @@ class Building {
             totalPops -= currentCost;
             amount++;
             totalBuildings++;
-            sounds['click.mp3'].cloneNode(false).play();
+            playSound('click.mp3');
         }
         this.amount = amount;
         this.determineCost();
@@ -1174,7 +1198,7 @@ class Upgrade {
         if (this.bought || totalPops < this.cost)
             return;
         totalPops -= this.cost;
-        sounds['click.mp3'].cloneNode(false).play();
+        playSound('click.mp3');
 
         switch (this.type) {
             case "cursor": {
