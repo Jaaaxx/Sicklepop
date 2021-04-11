@@ -1360,8 +1360,8 @@ class Boost {
     constructor(name) {
         this.name = name;
         if (name === 'autoBucketClick') {
-            this.duration = 5 * 1000;
-            this.timeLeft = 5 * 1000;
+            this.duration = 120 * 1000;
+            this.timeLeft = 120 * 1000;
         }
     }
 
