@@ -13,7 +13,7 @@ let multiplier = 1;
 let tickSpeed = 10;
 // Click variables
 let clickMultiplier = 1;
-let dpsClicks = 0.00;
+let dpsClicks = 1;
 let cpc = 0;
 // Building variables
 let buildings = {};
@@ -41,7 +41,7 @@ let bucketHover = false;
 let sounds = {};
 let interacted = false;
 let boosts = [];
-let boostTypes = ['autoBucketClick'];
+let boostTypes = ['autoBucketClick', 'clickMultiplier'];
 
 // JS Console functions
 function addPops(num) {
@@ -99,6 +99,7 @@ window.onload = function() {
     findDps = function() {
         let r = 0;
         for (let b in buildings) {
+            buildings[b].determineProd();
             if (buildings[b].name === "Cursor") {
                 cursorClickMax = 1000 / (buildings[b].amount * 1);
                 cursorClickTimer = 0;
@@ -162,7 +163,7 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        let spawnChance = Math.floor(Math.random() * 100_00);
+        let spawnChance = Math.floor(Math.random() * 500_000);
 
         if (spawnChance === 0) {
             spawnGoldenPop();
@@ -269,7 +270,7 @@ window.onload = function() {
     // Runs when big popsicle is clicked
     function onBigPopsicleClick(clientX, clientY, fake=false) {
         interacted = true;
-        cpc = clickMultiplier + (dps * dpsClicks);
+        cpc = clickMultiplier * dpsClicks;
         let x;
         let y;
         if (!fake) {
@@ -891,6 +892,7 @@ window.onload = function() {
     }
 
     function clickGoldenPop(el, fake) {
+        findDps();
         el.classList.remove("goldenPopsicleDivTrans");
         if (el.children[0].classList.contains("goldenPopsicleText"))
             return;
@@ -1066,15 +1068,19 @@ class Building {
 
     determineCost() {
         this.currentCost = Number((this.baseCost * (growthRate ** this.amount)).toFixed()); // Formula for determining cost
+        this.determineProd()
+
+        this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">") + 2) + formatSci(this.currentCost);
+        this.ownedButton.innerText = formatSci(this.amount);
+    }
+
+    determineProd() {
         if (this.name === "Cursor") {
-            this.production = clickMultiplier + (dps * dpsClicks);
+            this.production = clickMultiplier * dpsClicks;
         } else {
             // Formula for determining production
             this.production = this.baseProduction;
         }
-
-        this.priceButton.innerHTML = this.priceButton.innerHTML.substr(0, this.priceButton.innerHTML.indexOf("\">") + 2) + formatSci(this.currentCost);
-        this.ownedButton.innerText = formatSci(this.amount);
     }
 
     presReset() {
@@ -1374,11 +1380,18 @@ class Boost {
             this.duration = 120 * 1000;
             this.timeLeft = 120 * 1000;
         }
+        if (name === 'clickMultiplier') {
+            this.duration = 120 * 1000;
+            this.timeLeft = 120 * 1000;
+        }
     }
 
     runBoost() {
         if (this.name === 'autoBucketClick' && !this.isRunning) {
             autoBucketClick += 1;
+        }
+        if (this.name === 'clickMultiplier' && !this.isRunning) {
+            dpsClicks *= 5;
         }
 
         this.isRunning = true;
@@ -1387,6 +1400,9 @@ class Boost {
     cancelBoost() {
         if (this.name === 'autoBucketClick') {
             autoBucketClick -= 1;
+        }
+        if (this.name === 'clickMultiplier') {
+            dpsClicks /= 5;
         }
         this.div.remove();
     }

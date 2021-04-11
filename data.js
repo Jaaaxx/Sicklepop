@@ -209,5 +209,9 @@ const boostsData = {
     'autoBucketClick': {
         'name': 'Auto Collect',
         'description': 'Automatically collects droplets from the bucket when ready. Click faster!'
+    },
+    'clickMultiplier': {
+        'name': 'Click Multiplier',
+        'description': 'Clicking power x5!'
     }
 }
