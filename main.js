@@ -25,7 +25,7 @@ let upgradeColors = {};
 let bonusDroplets = 0;
 let bonusDropletsInterval = -1;
 let bdBackgroundInterval = 1;
-let popsPerClick = 1;
+let popsPerClick = 0;
 // Boosts
 let autoBucketClick = 0;
 // Function declarations
@@ -292,9 +292,9 @@ window.onload = function() {
     function onBucketClick(num = 1) {
         if (droplets >= reqDroplets) {
             droplets -= reqDroplets;
-            totalPops += popsPerClick * num;
-            runPops += popsPerClick * num;
-            lifetimePops += popsPerClick * num;
+            totalPops += (1 + (popsPerClick * reqDroplets * dMult)) * num;
+            runPops += (1 + (popsPerClick * reqDroplets * dMult)) * num;
+            lifetimePops += (1 + (popsPerClick * reqDroplets * dMult)) * num;
             reqDroplets++;
             playSound('click2.mp3');
         }
@@ -472,6 +472,7 @@ window.onload = function() {
             let ttStrings;
 
             if (u instanceof Upgrade) {
+                u.updateState();
                 ttStrings = [
                     [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
                     [true, fontpx * 60 + "px 'Open Sans'", "$" + formatSci(u.cost), '#c2cc52'],
@@ -1182,6 +1183,10 @@ class Upgrade {
         this.description = description;
         this.uid = upgrades.length;
 
+        this.updateState();
+    }
+
+    updateState() {
         if(this.tier === 1)
             this.requiredBuildings = 1;
         else if(this.tier === 2)
@@ -1202,7 +1207,7 @@ class Upgrade {
             }
             case "stick": {
                 this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
-                this.info = "Bucket clicks produce <#f1f1f1 twice</> as many popsicles.";
+                this.info = "Bucket clicks produce <#f1f1f1 " + parseFloat(((popsPerClick + 0.1) * reqDroplets * dMult).toFixed(1)) + "</> more popsicles per click.";
                 break;
             }
             case "bucket": {
@@ -1277,7 +1282,7 @@ class Upgrade {
                 break;
             }
             case "stick": {
-                popsPerClick *= 2;
+                popsPerClick += 0.1;
                 break;
             }
             case "bucket": {
