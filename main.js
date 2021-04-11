@@ -888,12 +888,12 @@ window.onload = function() {
         imgDiv.appendChild(img);
         imgDiv.addEventListener("click", () => clickGoldenPop(imgDiv, false));
         setTimeout(() => clickGoldenPop(imgDiv, true), 15000);
-        setTimeout(() => imgDiv.classList.add("goldenPopsicleDivTrans"), 10);
+        setTimeout(() => imgDiv.classList.add("opacityTrans"), 10);
     }
 
     function clickGoldenPop(el, fake) {
         findDps();
-        el.classList.remove("goldenPopsicleDivTrans");
+        el.classList.remove("opacityTrans");
         if (el.children[0].classList.contains("goldenPopsicleText"))
             return;
         if (fake) {
@@ -908,11 +908,11 @@ window.onload = function() {
         txt.textContent = boostsData[b.name].name + "!";
         txt.classList.add("goldenPopsicleText");
         el.appendChild(txt);
-        el.classList.add("goldenPopsicleDivDis");
+        el.classList.add("goldenPopsicleDivDis", "goldenPopsicleDivBehind");
         el.style.left = (parseInt(el.style.left.substr(0, el.style.left.length-1))-2) + "%";
 
         playSound('click2.mp3');
-        setTimeout(() => txt.classList.add("goldenPopsicleTextTrans"), 10);
+        setTimeout(() => txt.classList.add("opacityTrans"), 10);
         setTimeout(() => el.remove(), 3000);
     }
 

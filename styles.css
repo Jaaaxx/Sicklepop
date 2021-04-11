@@ -318,7 +318,7 @@ html, body {
     position: absolute;
     top: 50px;
     left: 50px;
-    z-index: 11;
+    z-index: 12;
     border-radius: 50%;
 
     -webkit-touch-callout: none;
@@ -332,8 +332,8 @@ html, body {
     transition: opacity 15s ease-in-out;
 }
 
-.goldenPopsicleDivTrans {
-    opacity: 0;
+.goldenPopsicleDivBehind {
+    z-index: 11;
 }
 
 .goldenPopsicleDivDis {
@@ -347,7 +347,7 @@ html, body {
     transition: opacity 3s ease-in-out;
 }
 
-.goldenPopsicleTextTrans {
+.opacityTrans {
     opacity: 0;
 }
 
