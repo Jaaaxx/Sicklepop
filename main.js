@@ -1377,12 +1377,12 @@ class Boost {
     constructor(name) {
         this.name = name;
         if (name === 'autoBucketClick') {
-            this.duration = 120 * 1000;
-            this.timeLeft = 120 * 1000;
+            this.duration = 60 * 1000;
+            this.timeLeft = 60 * 1000;
         }
         if (name === 'clickMultiplier') {
-            this.duration = 120 * 1000;
-            this.timeLeft = 120 * 1000;
+            this.duration = 15 * 1000;
+            this.timeLeft = 15 * 1000;
         }
     }
 
