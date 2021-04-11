@@ -162,7 +162,7 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        let spawnChance = Math.floor(Math.random() * 1000_000);
+        let spawnChance = Math.floor(Math.random() * 100_000);
 
         if (spawnChance === 0) {
             spawnGoldenPop();
