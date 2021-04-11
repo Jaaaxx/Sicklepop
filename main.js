@@ -162,13 +162,13 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        let spawnChance = Math.floor(Math.random() * 100_00);
+        let spawnChance = Math.floor(Math.random() * 1000_000);
 
         if (spawnChance === 0) {
             spawnGoldenPop();
         }
 
-        if (autoBucketClick > 0 && droplets >= reqDroplets * dMult) {
+        if (autoBucketClick > 0 && droplets >= reqDroplets) {
             onBucketClick(autoBucketClick);
         }
 
@@ -887,9 +887,11 @@ window.onload = function() {
         imgDiv.appendChild(img);
         imgDiv.addEventListener("click", () => clickGoldenPop(imgDiv, false));
         setTimeout(() => clickGoldenPop(imgDiv, true), 15000);
+        setTimeout(() => imgDiv.classList.add("goldenPopsicleDivTrans"), 10);
     }
 
     function clickGoldenPop(el, fake) {
+        el.classList.remove("goldenPopsicleDivTrans");
         if (el.children[0].classList.contains("goldenPopsicleText"))
             return;
         if (fake) {
@@ -1211,7 +1213,7 @@ class Upgrade {
             }
             case "stick": {
                 this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
-                this.info = "Bucket clicks produce <#f1f1f1 " + parseFloat(((popsPerClick + 0.1) * reqDroplets * dMult).toFixed(1)) + "</> more popsicles per click.";
+                this.info = "Bucket clicks produce <#f1f1f1 " + parseFloat(((popsPerClick + 0.01) * reqDroplets * dMult).toFixed(2)) + "</> more popsicles per click.";
                 break;
             }
             case "bucket": {
@@ -1221,7 +1223,7 @@ class Upgrade {
             }
             case "collector": {
                 this.cost = 10 * (growthRate ** (this.tier * 10)) / growthRate;
-                this.info = "Generates<#f1f1f1 " + Math.pow(2, this.tier - 1) + "</>  free " + plrl(Math.pow(2, this.tier - 1), "popsicle") + " every <#f1f1f1 " + Math.max(1, 20 - Math.floor((this.tier - 1) / 2)) + "</> droplets.";
+                this.info = "Generates<#f1f1f1 " + Math.pow(2, this.tier - 1) + "</>  free " + plrl(Math.pow(2, this.tier - 1), "popsicle") + " every <#f1f1f1 " + Math.max(1, 100 - Math.floor((this.tier - 1) / 2)) + "</> droplets.";
                 break;
             }
             default: {
@@ -1286,7 +1288,7 @@ class Upgrade {
                 break;
             }
             case "stick": {
-                popsPerClick += 0.1;
+                popsPerClick += 0.01;
                 break;
             }
             case "bucket": {
@@ -1295,7 +1297,7 @@ class Upgrade {
             }
             case "collector": {
                 bonusDroplets = Math.pow(2, this.tier - 1);
-                bonusDropletsInterval = Math.max(1, 20 - Math.floor((this.tier - 1) / 2));
+                bonusDropletsInterval = Math.max(1, 100 - Math.floor((this.tier - 1) / 2));
                 break;
             }
             default: {
