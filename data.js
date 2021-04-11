@@ -204,3 +204,10 @@ const buildingsData = [
         "description": "It is okay to accept candy from this one."
     }
 ]
+
+const boostsData = {
+    'autoBucketClick': {
+        'name': 'Auto Collect',
+        'description': 'Automatically collects droplets from the bucket when ready. Click faster!'
+    }
+}

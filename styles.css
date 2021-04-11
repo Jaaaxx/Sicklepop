@@ -49,9 +49,18 @@ html, body {
     cursor: pointer;
     border-radius: 30%;
     padding: 0;
-    color: blue;
 
     /*border: 3px dotted white;*/
+}
+
+.clickable-div-boost {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+
+    border: 1px solid lightgoldenrodyellow;
 }
 
 /* Middle Area */
@@ -309,12 +318,34 @@ html, body {
     position: absolute;
     top: 50px;
     left: 50px;
-    z-index: 10;
-    cursor: pointer;
+    z-index: 11;
     border-radius: 50%;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
 }
 
+.goldenPopsicleDivDis {
+    cursor: auto;
+}
+
+.goldenPopsicleText {
+    color: #ffdead;
+    -webkit-text-stroke: 1px #dbb67f;
+    opacity: 1;
+    transition: opacity 3s ease-in-out;
+}
+
+.goldenPopsicleTextTrans {
+    opacity: 0;
+}
 
 .goldenPopsicle {
     position: relative;
+    pointer-events: none;
+    -webkit-user-drag: none;
 }

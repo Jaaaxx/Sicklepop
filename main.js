@@ -26,6 +26,8 @@ let bonusDroplets = 0;
 let bonusDropletsInterval = -1;
 let bdBackgroundInterval = 1;
 let popsPerClick = 1;
+// Boosts
+let autoBucketClick = 0;
 // Function declarations
 let findDps;
 let formatSci;
@@ -38,6 +40,8 @@ let formatNums = [' million',' billion',' trillion',' quadrillion',' quintillion
 let bucketHover = false;
 let sounds = {};
 let interacted = false;
+let boosts = [];
+let boostTypes = ['autoBucketClick'];
 
 // JS Console functions
 function addPops(num) {
@@ -78,6 +82,7 @@ window.onload = function() {
     let anDroplets = [{'timeLeft': 0, 'maxTime': 0, 'image': 'droplet.png', 'size': [0, 0, 0, 0]}];
     let anBigClick = 0;
     let anBigHover = false;
+    let forceReset = false;
 
     // Tooltip canvas setup
     let ttcanvas;
@@ -157,11 +162,16 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        let spawnChance = Math.floor(Math.random() * 5000);
+        let spawnChance = Math.floor(Math.random() * 100_00);
 
         if (spawnChance === 0) {
             spawnGoldenPop();
         }
+
+        if (autoBucketClick > 0 && droplets >= reqDroplets * dMult) {
+            onBucketClick(autoBucketClick);
+        }
+
         droplets += dps / (tickSpeed * 10);
         lifetimeDroplets += dps / (tickSpeed * 10);
 
@@ -221,6 +231,7 @@ window.onload = function() {
     }, tickSpeed)}
 
     function onWindowResize() {
+        forceReset = true;
         setupCanvas();
         Object.values(buildings).forEach((e) => {
             e.setupInnerCanvas();
@@ -278,12 +289,12 @@ window.onload = function() {
     }
 
     // Runs when bucket is clicked
-    function onBucketClick(clientX, clientY) {
+    function onBucketClick(num = 1) {
         if (droplets >= reqDroplets) {
             droplets -= reqDroplets;
-            totalPops += popsPerClick;
-            runPops += popsPerClick;
-            lifetimePops += popsPerClick;
+            totalPops += popsPerClick * num;
+            runPops += popsPerClick * num;
+            lifetimePops += popsPerClick * num;
             reqDroplets++;
             playSound('click2.mp3');
         }
@@ -324,6 +335,37 @@ window.onload = function() {
             : "per second: " + formatSci(dps);
         totalTextHeight += quickMeasureHeight(dpsString, ctx) + tMarg;
         ctx.fillText(dpsString, canvas.width / 2, totalTextHeight);
+
+        // Boosts
+        let replDivs = false;
+        if (forceReset) {
+            replDivs = true;
+            forceReset = false;
+        }
+        for (let i = boosts.length - 1; i >= 0; i--) {
+            if (boosts[i].timeLeft - 10 <= 0) {
+                boosts[i].cancelBoost();
+                boosts.splice(i, 1);
+                replDivs = true;
+            }
+        }
+        for (let i = 0; i < boosts.length; i++) {
+            boosts[i].timeLeft -= 10;
+            boosts[i].runBoost();
+
+            let img = images['icon-cursor.png'].cloneNode(false);
+            let scale = Math.min(canvas.width * 0.125 / img.width, canvas.height * 0.125 / img.height);
+            let width = img.width * scale;
+            let height = img.height * scale;
+
+            let x = (canvas.width) - (width) - 5;
+            let y = (i * (height + 5)) + 5;
+
+            ctx.drawImage(img, x, y, width, height);
+
+            if (boosts[i].div == null || replDivs)
+                boosts[i].createDiv(x, y, width, height, replDivs, i);
+        }
 
         // Big Popsicle
         let img = images["pop-1.png"].cloneNode(false);
@@ -433,10 +475,16 @@ window.onload = function() {
                 ttStrings = [
                     [false, fontpx * 50 + "px 'Open Sans'", u.name, 'white'],
                     [true, fontpx * 60 + "px 'Open Sans'", "$" + formatSci(u.cost), '#c2cc52'],
-                    [false, fontpx * 40 + "px 'Open Sans'", "[Upgrade]", 'lightgray'],
+                    [false, fontpx * 40 + "px 'Open Sans'", "[Upgrade]", '`lightgray`'],
                     ["<hr>"],
                     [false,fontpx * 36 + "px 'Open Sans'", u.info, 'navajowhite'],
                     [false, fontpx * 36 + "px 'Open Sans'", '“' + u.description + '”', '#a5a49f']
+                ];
+            } if (u instanceof Boost) {
+                ttStrings = [
+                    [false, fontpx * 40 + "px 'Open Sans'", boostsData[u.name].name, 'white'],
+                    [false, fontpx * 35 + "px 'Open Sans'", boostsData[u.name].description, 'lightgray'],
+                    [false, fontpx * 35 + "px 'Open Sans'", Math.round(u.timeLeft / 1000) + plrl(Math.round(u.timeLeft / 1000), " second") + " remaining", 'navajowhite']
                 ];
             } else if (u instanceof Building) {
                 ttStrings = [
@@ -504,6 +552,10 @@ window.onload = function() {
                     y = Math.min(distance, uCH);
                 else
                     y = uCH;
+            } if (u instanceof Boost) {
+                x = 1;
+                distance = u.div.getBoundingClientRect().top;
+                y = distance;
             } else if (u instanceof Building) {
                 if ((currTooltip['y'] + ttrect.top - marg) + boxHeight > window.innerHeight)
                     y = window.innerHeight - boxHeight - 1;
@@ -621,9 +673,9 @@ window.onload = function() {
     }
 
     // Draw border around tooltips
-    function drawBorder(xPos, yPos, width, height, thickness = 1) {
-        ttctx.fillStyle = 'white';
-        ttctx.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
+    function drawBorder(xPos, yPos, width, height, thickness = 1 , context = ttctx, color = 'white') {
+        context.fillStyle = color;
+        context.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
     }
 
     function tooltipMeasure(i) {
@@ -697,19 +749,19 @@ window.onload = function() {
             onBigPopsicleClick(event.clientX, event.clientY);
         }
         else if (event.target === bucketClickable) {
-            onBucketClick(event.clientX, event.clientY);
+            onBucketClick();
         }
     }
 
     function onDocumentHover(event) {
         let target = event.target;
         anBigHover = target === bigPopsicleClickable;
-        if (!target.classList.contains("buyBuilding") && !target.classList.contains("upgradeButton")) {
+        if (!target.classList.contains("buyBuilding") && !target.classList.contains("upgradeButton") && !target.classList.contains("clickable-div-boost")) {
             for (let depth = 0; depth < 3; depth++) {
                 if (!target.parentElement)
                     break;
                 target = target.parentElement;
-                if (target.classList.contains("buyBuilding") || target.classList.contains("upgradeButton")) {
+                if (target.classList.contains("buyBuilding") || target.classList.contains("upgradeButton") || target.classList.contains("clickable-div-boost")) {
                     break;
                 }
             }
@@ -721,6 +773,11 @@ window.onload = function() {
             currTooltip = {"x": event.clientX, "y": event.clientY, "upgrade": b};
         } else if (target.classList.contains("upgradeButton")) {
             let b = upgrades[parseInt(target.id.substr(7))];
+            if (b === currTooltip)
+                return;
+            currTooltip = {"x": event.clientX, "y": event.clientY, "upgrade": b};
+        }  else if (target.classList.contains("clickable-div-boost")) {
+            let b = boosts[target.id.substr(6)];
             if (b === currTooltip)
                 return;
             currTooltip = {"x": event.clientX, "y": event.clientY, "upgrade": b};
@@ -817,6 +874,7 @@ window.onload = function() {
         img.classList.add("goldenPopsicle");
         img.style.height = 15 + "vh";
         img.style.width = "auto";
+        img.setAttribute('draggable', false);
         imgDiv.style.top = Math.floor(Math.random() * 90) + "%";
         imgDiv.style.left = Math.floor(Math.random() * 90) + "%";
         imgDiv.classList.add("goldenPopsicleDiv");
@@ -827,13 +885,26 @@ window.onload = function() {
     }
 
     function clickGoldenPop(el, fake) {
+        if (el.children[0].classList.contains("goldenPopsicleText"))
+            return;
         if (fake) {
             el.remove();
             return;
         }
+        let b = new Boost(boostTypes[Math.floor(Math.random() * boostTypes.length)]);
+        boosts.push(b);
+
+        el.removeChild(el.children[0]);
+        let txt = document.createElement('h1');
+        txt.textContent = boostsData[b.name].name + "!";
+        txt.classList.add("goldenPopsicleText");
+        el.appendChild(txt);
+        el.classList.add("goldenPopsicleDivDis");
+        el.style.left = (parseInt(el.style.left.substr(0, el.style.left.length-1))-2) + "%";
 
         playSound('click2.mp3');
-        el.remove();
+        setTimeout(() => txt.classList.add("goldenPopsicleTextTrans"), 10);
+        setTimeout(() => el.remove(), 3000);
     }
 
     function resetVariables() {
@@ -1276,5 +1347,60 @@ class Upgrade {
 
     hideUpgrade() {
         this.htmlTag.classList.add("hidden");
+    }
+}
+
+class Boost {
+    name;
+    duration;
+    timeLeft;
+    div = null;
+    isRunning = false;
+
+    constructor(name) {
+        this.name = name;
+        if (name === 'autoBucketClick') {
+            this.duration = 5 * 1000;
+            this.timeLeft = 5 * 1000;
+        }
+    }
+
+    runBoost() {
+        if (this.name === 'autoBucketClick' && !this.isRunning) {
+            autoBucketClick += 1;
+        }
+
+        this.isRunning = true;
+    }
+
+    cancelBoost() {
+        if (this.name === 'autoBucketClick') {
+            autoBucketClick -= 1;
+        }
+        this.div.remove();
+    }
+
+    createDiv(x, y, width, height, replace, index) {
+        if (replace) {
+            this.div.remove();
+            this.div = null;
+        }
+        if (this.div)
+            return;
+
+        let clickableDiv = document.createElement('div');
+
+
+        clickableDiv.style.width = width + "px";
+        clickableDiv.style.height = height + "px";
+        clickableDiv.style.left = x + "px";
+        clickableDiv.style.top = y + "px";
+
+
+        clickableDiv.classList.add('clickable-div-boost');
+        clickableDiv.id = "boost-" + index;
+
+        document.body.appendChild(clickableDiv);
+        this.div = clickableDiv;
     }
 }
