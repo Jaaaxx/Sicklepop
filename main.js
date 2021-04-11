@@ -1015,6 +1015,7 @@ class Building {
         else if (this.name === "Cursor")
             icon = images['icon-cursor.png'].cloneNode(false);
         icon.classList.add("buildingIcon");
+        icon.ondragstart = () => {return false};
         this.buyButton.appendChild(icon);
 
         this.labelButton = document.createElement("span");
@@ -1026,6 +1027,7 @@ class Building {
         this.priceButton = document.createElement("span");
         this.priceButton.classList.add("buyBuildingCost");
         this.priceButton.id = "price" + this.name;
+        this.priceButton.ondragstart = () => {return false};
         this.namePriceRows.appendChild(this.priceButton);
 
         let img = images['smallPop-1.png'].cloneNode(false);
@@ -1278,6 +1280,8 @@ class Upgrade {
         upgrade.onclick = () => this.buyUpgrade();
         this.htmlTag = upgrade;
         upgradeRows.append(upgrade);
+        upgrade.ondragstart = () => {return false};
+
         this.deactivateUpgrade();
         this.hideUpgrade();
     }

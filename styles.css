@@ -206,6 +206,11 @@ html, body {
     max-height: 100%;
     border: 1px brown solid;
     opacity: 100%;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .upgradeButton:hover:not(.disabled) {
