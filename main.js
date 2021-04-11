@@ -189,7 +189,7 @@ window.onload = function() {
             document.getElementById("leftArea").style.backgroundColor = bdBackgroundInterval % 2 === 0 ? "#5a4a57" : "#453943";
         }
 
-        if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDropletsInterval === 0) {
+        if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDropletsInterval === 0 && droplets <= reqDroplets) {
             if (Math.floor(lifetimeDroplets) % (bonusDropletsInterval * bdBackgroundInterval * bdBackgroundInterval === 1 ? 1: 2) === 0)
                 flashBackground((bdBackgroundInterval % 2 === 0 ? "#453943" : "#5a4a57"), 100);
 
@@ -481,6 +481,10 @@ window.onload = function() {
                     [false,fontpx * 36 + "px 'Open Sans'", u.info, 'navajowhite'],
                     [false, fontpx * 36 + "px 'Open Sans'", '“' + u.description + '”', '#a5a49f']
                 ];
+                if (u.type === "collector") {
+                    let desc = "Will not activate unless you have less than " + reqDroplets + plrl(reqDroplets, " droplet") + "!";
+                    ttStrings.push([false, fontpx * 36 + "px 'Open Sans'", desc, '#d2809b'])
+                }
             } if (u instanceof Boost) {
                 ttStrings = [
                     [false, fontpx * 40 + "px 'Open Sans'", boostsData[u.name].name, 'white'],
