@@ -164,7 +164,7 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        let spawnChance = Math.floor(Math.random() * 500_000);
+        let spawnChance = Math.floor(Math.random() * 180_00);
 
         if (spawnChance === 0) {
             spawnGoldenPop();
@@ -173,7 +173,6 @@ window.onload = function() {
         if (autoBucketClick > 0 && droplets >= reqDroplets) {
             onBucketClick(autoBucketClick);
         }
-
         droplets += dps / (tickSpeed * 10);
         lifetimeDroplets += dps / (tickSpeed * 10);
 
@@ -355,6 +354,8 @@ window.onload = function() {
                 boosts.splice(i, 1);
                 replDivs = true;
             }
+            if (boosts[i].timeLeft === boosts[i].duration)
+                findDps();
         }
         for (let i = 0; i < boosts.length; i++) {
             boosts[i].timeLeft -= 10;
@@ -908,7 +909,6 @@ window.onload = function() {
     }
 
     function clickGoldenPop(el, fake) {
-        findDps();
         el.classList.remove("opacityTrans");
         if (el.children[0].classList.contains("goldenPopsicleText"))
             return;
@@ -918,7 +918,6 @@ window.onload = function() {
         }
         let b = new Boost(boostTypes[Math.floor(Math.random() * boostTypes.length)]);
         boosts.push(b);
-
         el.removeChild(el.children[0]);
         let txt = document.createElement('h1');
         txt.textContent = boostsData[b.name].name + "!";
