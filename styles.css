@@ -316,7 +316,7 @@ html, body {
 }
 
 .disabled {
-    opacity: 60%;
+    opacity: 30%;
 }
 
 .goldenPopsicleDiv {
@@ -360,4 +360,9 @@ html, body {
     position: relative;
     pointer-events: none;
     -webkit-user-drag: none;
+}
+
+#grayDiv {
+    opacity: 50%;
+    background-color: black;
 }

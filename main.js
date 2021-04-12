@@ -18,6 +18,7 @@ let cpc = 0;
 // Building variables
 let buildings = {};
 let totalBuildings = 0;
+let mysteryBuilding = null;
 // Upgrade variables
 let upgrades = [];
 let boughtUpgrades = [];
@@ -203,8 +204,13 @@ window.onload = function() {
 
         for (let b in buildings) {
             buildings[b].deactivateBuilding();
+            if (buildings[b].hidden === true && totalPops >= buildings[b].baseCost / 5) {
+                showMystery();
+                buildings[b].mysteryUnlock();
+            }
             if (buildings[b].hidden === true && totalPops >= buildings[b].baseCost / 2) {
                 buildings[b].unhideBuilding();
+                hideMystery();
             }
             if (totalPops >= buildings[b].currentCost) {
                 buildings[b].activateBuilding();
@@ -510,7 +516,15 @@ window.onload = function() {
                     [false, fontpx * 36 + "px 'Open Sans'", "You need<#f1f1f1 " + formatSci(checkPrestige()[1]) + "</> more popsicles for the next level.", '#a5a49f'],
                     [false, fontpx * 36 + "px 'Open Sans'", "Multiplier:<#f1f1f1 " + multiplier + "%</>", '#a5a49f'],
                 ];
-
+            } else if (u === "mysteryBuilding") {
+                ttStrings = [
+                    [false, fontpx * 50 + "px 'Open Sans'", "???", 'white'],
+                    [true, fontpx * 60 + "px 'Open Sans'", "$" + formatSci(mysteryBuilding.baseCost), '#C2CC52'],
+                    [false, fontpx * 40 + "px 'Open Sans'", "???", 'lightgray'],
+                    ["<hr>"],
+                    [false, fontpx * 40 + "px 'Open Sans'", "???", 'navajowhite'],
+                    ["<hr>"],
+                ];
             }
 
             let marg = 15;
@@ -562,7 +576,7 @@ window.onload = function() {
                 x = 1;
                 distance = u.div.getBoundingClientRect().top;
                 y = distance;
-            } else if (u instanceof Building) {
+            } else if (u instanceof Building || u === "mysteryBuilding") {
                 if ((currTooltip['y'] + ttrect.top - marg) + boxHeight > window.innerHeight)
                     y = window.innerHeight - boxHeight - 1;
                 else
@@ -774,6 +788,8 @@ window.onload = function() {
         }
         if (target.classList.contains("buyBuilding")) {
             let b = buildings[target.id.substr(3).toLowerCase()];
+            if (mysteryBuilding != null && target.id === "mysteryBuilding")
+                b = "mysteryBuilding";
             if (b === currTooltip)
                 return;
             currTooltip = {"x": event.clientX, "y": event.clientY, "upgrade": b};
@@ -916,6 +932,15 @@ window.onload = function() {
         setTimeout(() => el.remove(), 3000);
     }
 
+    function hideMystery() {
+        document.getElementById("mysteryBuilding").classList.add("hidden");
+        mysteryBuilding = null;
+    }
+
+    function showMystery() {
+        document.getElementById("mysteryBuilding").classList.remove("hidden");
+    }
+
     function resetVariables() {
         totalPops = 0;
         runPops = 0;
@@ -952,6 +977,7 @@ window.onload = function() {
     popCanvas();
     setupCanvas();
     Object.values(buildings).forEach((e) => e.setupInnerCanvas());
+    hideMystery();
     gameLoop();
 }
 
@@ -1003,7 +1029,8 @@ class Building {
         this.buyButton = document.createElement("div");
         this.buyButton.classList.add("buyBuilding");
         this.buyButton.id = "buy" + name;
-        document.getElementById("buyRows").appendChild(this.buyButton);
+        let buyRows = document.getElementById("buyRows");
+        buyRows.insertBefore(this.buyButton, buyRows.children[buyRows.children.length - 1]);
 
         this.namePriceRows = document.createElement("div");
         this.namePriceRows.classList.add("namePriceRows");
@@ -1095,6 +1122,13 @@ class Building {
         }
         this.drawInnerCanvas();
         this.determineCost();
+    }
+
+    mysteryUnlock() {
+        let mys = document.getElementById("mysteryCost");
+        let imgString = "<img src=\"images/smallPop-1.png\" style=\"height: 25px; width: auto;\">";
+        mys.innerHTML = imgString + this.baseCost;
+        mysteryBuilding = this;
     }
 
     setupInnerCanvas() {
