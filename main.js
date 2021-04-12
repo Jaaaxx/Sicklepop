@@ -349,13 +349,13 @@ window.onload = function() {
             forceReset = false;
         }
         for (let i = boosts.length - 1; i >= 0; i--) {
+            if (boosts[i].timeLeft === boosts[i].duration)
+                findDps();
             if (boosts[i].timeLeft - 10 <= 0) {
                 boosts[i].cancelBoost();
                 boosts.splice(i, 1);
                 replDivs = true;
             }
-            if (boosts[i].timeLeft === boosts[i].duration)
-                findDps();
         }
         for (let i = 0; i < boosts.length; i++) {
             boosts[i].timeLeft -= 10;
