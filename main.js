@@ -100,9 +100,8 @@ window.onload = function() {
     findDps = function() {
         let r = 0;
         for (let b in buildings) {
-            buildings[b].determineProd();
             if (buildings[b].name === "Cursor") {
-                cursorClickMax = 1000 / (buildings[b].amount * 1);
+                cursorClickMax = 1000 / buildings[b].amount;
                 cursorClickTimer = 0;
                 droplets = Math.floor(droplets);
             }
@@ -349,8 +348,6 @@ window.onload = function() {
             forceReset = false;
         }
         for (let i = boosts.length - 1; i >= 0; i--) {
-            if (boosts[i].timeLeft === boosts[i].duration)
-                findDps();
             if (boosts[i].timeLeft - 10 <= 0) {
                 boosts[i].cancelBoost();
                 boosts.splice(i, 1);
@@ -358,6 +355,8 @@ window.onload = function() {
             }
         }
         for (let i = 0; i < boosts.length; i++) {
+            if (boosts[i].isRunning === false)
+                findDps();
             boosts[i].timeLeft -= 10;
             boosts[i].runBoost();
 
