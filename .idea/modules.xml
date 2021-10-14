@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../ColonialSim/.idea/ColonialSim.iml" filepath="$PROJECT_DIR$/../ColonialSim/.idea/ColonialSim.iml" />
       <module fileurl="file://$PROJECT_DIR$/../OriginalCookieClicker/.idea/OriginalCookieClicker.iml" filepath="$PROJECT_DIR$/../OriginalCookieClicker/.idea/OriginalCookieClicker.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Sicklepop/.idea/Sicklepop.iml" filepath="$PROJECT_DIR$/../Sicklepop/.idea/Sicklepop.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Sicklepop.iml" filepath="$PROJECT_DIR$/.idea/Sicklepop.iml" />
     </modules>
   </component>
 </project>
