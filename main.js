@@ -34,6 +34,7 @@ let findDps;
 let formatSci;
 let plrl;
 let playSound;
+let popAbsoluteDivSetup = false;
 
 // Other
 let images = {};
@@ -55,6 +56,7 @@ function addPops(num) {
 window.onload = function() {
     // Elements
     let bigPopsicleClickable = document.getElementById("clickable-div-bigPopsicle");
+    let bigPopsicleClickableAbs = document.getElementById("clickable-div-bigPopsicle-abs");
     let bucketClickable = document.getElementById("clickable-div-bucket");
     let newsDiv = document.getElementById("newsDiv");
     // Semi-global variables
@@ -163,7 +165,7 @@ window.onload = function() {
 
     // Runs once every 10 milliseconds
     function gameLoop() {setInterval(function() {
-        let spawnChance = Math.floor(Math.random() * 180_00);
+        let spawnChance = Math.floor(Math.random() * 18_000); // 0.5 % chance per second
 
         if (spawnChance === 0) {
             spawnGoldenPop();
@@ -192,7 +194,6 @@ window.onload = function() {
         if (lifetimeDroplets !== 0 && bonusDroplets > 0 && Math.floor(lifetimeDroplets) % bonusDropletsInterval === 0 && droplets <= reqDroplets) {
             if (Math.floor(lifetimeDroplets) % (bonusDropletsInterval * bdBackgroundInterval * bdBackgroundInterval === 1 ? 1: 2) === 0)
                 flashBackground((bdBackgroundInterval % 2 === 0 ? "#453943" : "#5a4a57"), 100);
-
             totalPops += bonusDroplets;
             lifetimePops += bonusDroplets;
             droplets += bonusDroplets;
@@ -246,6 +247,8 @@ window.onload = function() {
 
 
     function setupCanvas() {
+        popAbsoluteDivSetup = false;
+
         canvas = document.getElementById("popCanvas");
         ctx  = canvas.getContext("2d");
         rect = canvas.getBoundingClientRect();
@@ -301,8 +304,19 @@ window.onload = function() {
             runPops += (1 + (popsPerClick * reqDroplets * dMult)) * num;
             lifetimePops += (1 + (popsPerClick * reqDroplets * dMult)) * num;
             reqDroplets++;
+
+            // Play animation on bucket click
+            let animOverlay = document.getElementsByClassName("leftAreaAbs")[0];
+            if (!animOverlay.classList.contains("whiteFlash"))
+                animOverlay.classList.add("whiteFlash");
+            else
+                reset_animation(animOverlay)
+            // setTimeout(() => onBucketOut(), 100);
+
             playSound('click2.mp3');
+            return true;
         }
+        return false;
     }
 
     function popCanvas() {
@@ -352,6 +366,12 @@ window.onload = function() {
                 boosts[i].cancelBoost();
                 boosts.splice(i, 1);
                 replDivs = true;
+
+                // Remove gold border once boosts are done
+                if (boosts.length === 0) {
+                    let animOverlay = document.getElementsByClassName("leftAreaAbs")[1];
+                    animOverlay.classList.remove("pulsatingBorderGold");
+                }
             }
         }
         for (let i = 0; i < boosts.length; i++) {
@@ -365,8 +385,8 @@ window.onload = function() {
             let width = img.width * scale;
             let height = img.height * scale;
 
-            let x = (canvas.width) - (width) - 5;
-            let y = (i * (height + 5)) + 5;
+            let x = (canvas.width) - (width) - 20;
+            let y = (i * (height + 5)) + 20;
 
             ctx.drawImage(img, x, y, width, height);
 
@@ -414,6 +434,17 @@ window.onload = function() {
         bigPopsicleClickable.style.marginLeft = ((canvas.width - (x + width))).toString() + "px";
         bigPopsicleClickable.style.marginRight = ((canvas.width - (x + width))).toString() + "px";
         bigPopsicleClickable.style.marginTop = (totalTextHeight + bcMargin).toString() + "px";
+
+
+        // Clickable div abs
+        if (!popAbsoluteDivSetup) {
+            bigPopsicleClickableAbs.style.height = height.toString() + "px";
+            bigPopsicleClickableAbs.style.width = width.toString() + "px";
+            bigPopsicleClickableAbs.style.marginLeft = ((canvas.width - (x + width))).toString() + "px";
+            bigPopsicleClickableAbs.style.marginRight = ((canvas.width - (x + width))).toString() + "px";
+            bigPopsicleClickableAbs.style.marginTop = (totalTextHeight + bcMargin).toString() + "px";
+            popAbsoluteDivSetup = true;
+        }
 
         // Bucket
         let gimg = droplets >= reqDroplets ? images["bucket1-full.png"].cloneNode(false) : images["bucket1-empty.png"].cloneNode(false);
@@ -748,6 +779,13 @@ window.onload = function() {
         return ((((oldValue - oldMin) * newRange) / oldRange) + newMin)
     }
 
+    // Runs CSS animations on element again
+    function reset_animation(element) {
+      element.style.animation = 'none';
+      element.offsetHeight; /* trigger reflow */
+      element.style.animation = null;
+    }
+
     function drawDroplet(x, y) {
         if (!x || !y) {
             let bpcRect = bigPopsicleClickable.getBoundingClientRect();
@@ -765,7 +803,7 @@ window.onload = function() {
     }
 
     function onDocumentClick(event) {
-        if (event.target === bigPopsicleClickable) {
+        if (event.target === bigPopsicleClickable || event.target === bigPopsicleClickableAbs) {
             onBigPopsicleClick(event.clientX, event.clientY);
         }
         else if (event.target === bucketClickable) {
@@ -773,9 +811,37 @@ window.onload = function() {
         }
     }
 
+    function onDocumentRightClick(event) {
+        if (event.target === bigPopsicleClickable || event.target === bigPopsicleClickableAbs || event.target === bucketClickable) {
+            event.preventDefault();
+            shortcutBucketClick();
+            return false;
+        }
+        return true;
+    }
+
+    function onDocumentKeyUp(event) {
+        switch (event.code) {
+            case 'Space':
+                onSpacebarPressed(event);
+                break;
+        }
+    }
+
+    function onSpacebarPressed(event) {
+        shortcutBucketClick();
+    }
+
+    function shortcutBucketClick(event) {
+        if (onBucketClick()) {
+            onBucketHover();
+            setTimeout(() => onBucketOut(), 100);
+        }
+    }
+
     function onDocumentHover(event) {
         let target = event.target;
-        anBigHover = target === bigPopsicleClickable;
+        anBigHover = target === bigPopsicleClickable || target === bigPopsicleClickableAbs;
         if (!target.classList.contains("buyBuilding") && !target.classList.contains("upgradeButton") && !target.classList.contains("clickable-div-boost")) {
             for (let depth = 0; depth < 3; depth++) {
                 if (!target.parentElement)
@@ -813,16 +879,20 @@ window.onload = function() {
         let target = event.target;
         if (target.classList.contains("buyBuilding") || target.classList.contains("upgradeButton")) {
             currTooltip = null;
+        } else if (target === bigPopsicleClickable || target === bigPopsicleClickableAbs) {
+            if (anBigClick !== 0) {
+                anBigClick = 0;
+            }
         }
     }
 
     function onDocumentMouseDown(event) {
-        if (event.target === bigPopsicleClickable) {
+        if (event.target === bigPopsicleClickable || event.target === bigPopsicleClickableAbs) {
             anBigClick = -1;
         }
     }
     function onDocumentMouseUp(event) {
-        if (event.target === bigPopsicleClickable) {
+        if (event.target === bigPopsicleClickable || event.target === bigPopsicleClickableAbs) {
             anBigClick = 1;
         }
     }
@@ -925,6 +995,13 @@ window.onload = function() {
         el.classList.add("goldenPopsicleDivDis", "goldenPopsicleDivBehind");
         el.style.left = (parseInt(el.style.left.substr(0, el.style.left.length-1))-2) + "%";
 
+        // Golden popsicle border
+        let animOverlay = document.getElementsByClassName("leftAreaAbs")[1];
+        if (!animOverlay.classList.contains("pulsatingBorderGold"))
+            animOverlay.classList.add("pulsatingBorderGold");
+        else
+            reset_animation(animOverlay)
+
         playSound('click2.mp3');
         setTimeout(() => txt.classList.add("opacityTrans"), 10);
         setTimeout(() => el.remove(), 3000);
@@ -967,6 +1044,8 @@ window.onload = function() {
     document.addEventListener('mouseover', onDocumentHover);
     document.addEventListener('mouseout', onDocumentMouseLeave);
     document.addEventListener('mousemove', onDocumentHover);
+    document.addEventListener('contextmenu', onDocumentRightClick);
+    document.addEventListener('keyup', onDocumentKeyUp);
     bucketClickable.addEventListener('mousedown', onBucketHover)
     bucketClickable.addEventListener('mouseup', onBucketOut)
     sortedUpgrades.forEach((e) => e.makeHtml());
